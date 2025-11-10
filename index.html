@@ -1,58 +1,86 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Australian Roadside Drug Test Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="css/style.css" />
-  <!-- D3 v7 -->
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-</head>
-<body>
-  <header>
-    <h1>Australian Roadside Drug Test Dashboard</h1>
-    <p>Explore BITRE roadside drug test positives by jurisdiction, year, age group, drug type and detection method.</p>
-  </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Australian Police Drug Test Dashboard</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+  </head>
+  <body>
+    <!-- TOP HEADER -->
+    <header class="topbar">
+      <div class="brand-block">
+        <h1 class="brand-title">Australian Police Drug Test Dashboard</h1>
+        <p class="brand-sub">
+          Roadside drug test positives from BITRE (2008–2024)
+        </p>
+      </div>
+      <div class="top-right">
+        <span class="tag">COS30045</span>
+      </div>
+    </header>
 
-  <section id="controls">
-    <label for="jurisdictionSelect">Jurisdiction:</label>
-    <select id="jurisdictionSelect"></select>
+    <!-- NAV / FILTER BAR -->
+    <nav class="nav-bar">
+      <div class="nav-left">
+        <span class="nav-label">Years:</span>
+        <div id="yearPills" class="pill-group">
+          <!-- JS will generate toggle pills -->
+        </div>
+      </div>
+      <div class="nav-right">
+        <div class="filter-group">
+          <label class="nav-label">Jurisdiction</label>
+          <select id="jurSelect" class="nav-input" multiple></select>
+        </div>
+        <div class="filter-group">
+          <label class="nav-label">Drug type</label>
+          <select id="drugSelect" class="nav-input" multiple></select>
+        </div>
+        <div class="filter-group">
+          <label class="nav-label">Sort locations</label>
+          <select id="sortSelect" class="nav-input">
+            <option value="desc" selected>Highest first</option>
+            <option value="asc">Lowest first</option>
+            <option value="alpha">A → Z</option>
+          </select>
+        </div>
+        <button id="resetBtn" class="btn-secondary">Clear</button>
+      </div>
+    </nav>
 
-    <label for="yearSelect">Year:</label>
-    <select id="yearSelect"></select>
+    <!-- DASHBOARD -->
+    <main class="dashboard">
+      <section class="card">
+        <h2 class="card-title">Positives by Age Group</h2>
+        <p class="card-sub">
+          Which age bands recorded the most positives under the current filters.
+        </p>
+        <div id="ageChart" class="chart-container"></div>
+      </section>
 
-    <label for="drugSelect">Drug type:</label>
-    <select id="drugSelect">
-      <option value="All">All</option>
-    </select>
-  </section>
+      <section class="card">
+        <h2 class="card-title">Positives by Detection Method</h2>
+        <p class="card-sub">
+          Shows distribution across enforcement stages reported by police.
+        </p>
+        <div id="methodChart" class="chart-container"></div>
+      </section>
 
-  <main>
-    <div class="chart-panel">
-      <h2>Trend by Jurisdiction</h2>
-      <svg id="trendChart"></svg>
-    </div>
+      <section class="card card-full">
+        <h2 class="card-title">Locations with highest positives</h2>
+        <p class="card-sub">
+          Filter by year(s), jurisdiction(s), and drug(s) above. Sort to explore patterns.
+        </p>
+        <div id="locationChart" class="chart-container"></div>
+      </section>
+    </main>
 
-    <div class="chart-panel">
-      <h2>Age Group Breakdown</h2>
-      <svg id="ageChart"></svg>
-    </div>
+    <footer class="footer">
+      Source: BITRE road safety enforcement (cleaned). Built for Australian police drug test visualisation.
+    </footer>
 
-    <div class="chart-panel">
-      <h2>Detection Method Breakdown</h2>
-      <svg id="methodChart"></svg>
-    </div>
-
-    <div class="chart-panel">
-      <h2>Top Locations</h2>
-      <ul id="locationList"></ul>
-    </div>
-  </main>
-
-  <footer>
-    <p>Source: BITRE Road Safety Enforcement Data (cleaned in KNIME).</p>
-  </footer>
-
-  <script src="js/main.js"></script>
-</body>
+    <script src="js/main.js"></script>
+  </body>
 </html>
