@@ -1,1 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Australian Roadside Drug Test Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="css/style.css" />
+  <!-- D3 v7 -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Australian Roadside Drug Test Dashboard</h1>
+    <p>Explore BITRE roadside drug test positives by jurisdiction, year, age group, drug type and detection method.</p>
+  </header>
 
+  <section id="controls">
+    <label for="jurisdictionSelect">Jurisdiction:</label>
+    <select id="jurisdictionSelect"></select>
+
+    <label for="yearSelect">Year:</label>
+    <select id="yearSelect"></select>
+
+    <label for="drugSelect">Drug type:</label>
+    <select id="drugSelect">
+      <option value="All">All</option>
+    </select>
+  </section>
+
+  <main>
+    <div class="chart-panel">
+      <h2>Trend by Jurisdiction</h2>
+      <svg id="trendChart"></svg>
+    </div>
+
+    <div class="chart-panel">
+      <h2>Age Group Breakdown</h2>
+      <svg id="ageChart"></svg>
+    </div>
+
+    <div class="chart-panel">
+      <h2>Detection Method Breakdown</h2>
+      <svg id="methodChart"></svg>
+    </div>
+
+    <div class="chart-panel">
+      <h2>Top Locations</h2>
+      <ul id="locationList"></ul>
+    </div>
+  </main>
+
+  <footer>
+    <p>Source: BITRE Road Safety Enforcement Data (cleaned in KNIME).</p>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
