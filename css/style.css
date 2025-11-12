@@ -25,12 +25,32 @@ body {
 /* top header */
 .topbar {
   display: flex;
+  gap: 1rem;
   justify-content: space-between;
   align-items: center;
   background: #052a49;
   color: #fff;
   padding: 1rem 1.5rem;
 }
+
+/* home button – no circle */
+.home-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+.home-btn:hover .home-icon {
+  opacity: 0.9;
+}
+.home-icon {
+  height: 28px; /* adjust to your svg */
+  width: auto;
+  display: block;
+}
+
 .brand-title {
   margin: 0;
   font-size: 1.2rem;
@@ -42,7 +62,7 @@ body {
   opacity: 0.85;
 }
 .tag {
-  background: rgba(255,255,255,0.25);
+  background: rgba(255, 255, 255, 0.25);
   padding: 0.3rem 0.75rem;
   border-radius: 999px;
   font-size: 0.65rem;
@@ -150,7 +170,7 @@ body {
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 0.75rem 0.75rem 1rem;
-  box-shadow: 0 1px 2px rgba(15,23,42,0.03);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
 }
 
 .card-full {
