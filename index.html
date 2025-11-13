@@ -28,18 +28,17 @@
                 <!-- div for chart -->
                 <div id ="chart1" class="responsive-svg-container"></div>
                 <br>
-                <!--Chart 2-->
-                <div id = "chart2" class="responsive-svg-container"></div>
-                <br>
-                <div style="margin-bottom:10px; text-align:center;">
-                    <label for="yearSelect" style="font-weight:bold;">Select Year: </label>
-                    <select id="yearSelect">
-                        <option value="2024" selected>2024</option>
-                        <option value="2023">2023</option>
-                        <option value="2022">2022</option>
-                        <option value="2021">2021</option>
-                    </select>
+                <div id="chart2-container" style="display:flex; gap:20px; width:100%;">
+                    <div id="chart2-radar" style="flex:1;"></div>
+                    <div id="chart2-map" style="flex:1; display:block;"></div>
                 </div>
+
+                <div style="margin-top:10px; text-align:center;">
+                    <label><strong>Select Location:</strong></label>
+                    <select id="locationSelect"></select>
+                </div>
+
+                <br>
                 <div id="chart4" class="responsive-svg-container"></div>
             </div>
         </main>
