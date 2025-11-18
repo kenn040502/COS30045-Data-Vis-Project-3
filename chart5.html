@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chart — Detection methods over time</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a href="index.html" class="home-btn" aria-label="Go to homepage">
+        <img src="image/home.svg" alt="Home" class="home-icon" />
+      </a>
+      <div class="brand-block">
+        <h1 class="brand-title">Detection methods contribution over time</h1>
+        <p class="brand-sub">Stage 1–3 contributions (2008–2024)</p>
+      </div>
+      <div class="top-right">
+        <a href="visualization.html" class="btn-secondary">All charts</a>
+      </div>
+    </header>
+
+    <main class="dashboard">
+      <section class="card">
+        <div id="chart3" class="chart-container"></div>
+        <div id="chart3-info" class="chart-info">Click the chart to see breakdown by year.</div>
+      </section>
+    </main>
+
+    <script src="js/chart3.js"></script>
+    <!-- floating side navigation -->
+    <button id="prevFloat" aria-label="Previous chart" style="position:fixed;left:8px;top:50%;transform:translateY(-50%);z-index:60;" class="btn-secondary">←</button>
+    <button id="nextFloat" aria-label="Next chart" style="position:fixed;right:8px;top:50%;transform:translateY(-50%);z-index:60;" class="btn-secondary">→</button>
+    <script>
+      (function(){
+        const prev = 'chart2.html';
+        const next = 'chart3.html';
+        const p = document.getElementById('prevFloat');
+        const n = document.getElementById('nextFloat');
+        if(p) p.addEventListener('click', ()=> location.href = prev);
+        if(n) n.addEventListener('click', ()=> location.href = next);
+        document.addEventListener('keydown', (e)=>{
+          if(e.key === 'ArrowLeft') location.href = prev;
+          if(e.key === 'ArrowRight') location.href = next;
+        });
+      })();
+    </script>
+  </body>
+</html>

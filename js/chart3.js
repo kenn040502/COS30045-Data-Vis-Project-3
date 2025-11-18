@@ -129,7 +129,7 @@
     .append("path")
     .attr("class", "stage-area")
     .attr("fill", d => color(d.key))
-    .attr("fill-opacity", 0.8)
+    .attr("fill-opacity", 0.5)
     .attr("stroke", "#ffffff")
     .attr("stroke-width", 0.7)
     .attr("d", area);

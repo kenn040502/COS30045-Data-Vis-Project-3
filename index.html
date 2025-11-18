@@ -8,103 +8,46 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
   </head>
   <body>
-    <!-- TOP HEADER -->
-    <header class="topbar">
-      <a href="index.html" class="home-btn" aria-label="Go to homepage">
-        <img src="image/home.svg" alt="Home" class="home-icon" />
-      </a>
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Home — Australian Police Drug Test Dashboard</title>
+        <link rel="stylesheet" href="css/style.css" />
+      </head>
+      <body>
+        <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;">
+          <div style="max-width:900px;padding:2rem;">
+            <h1 style="margin-top:0;color:#00176B;">Australian Police Drug Test Dashboard</h1>
+            <p style="color:rgba(0,0,0,0.75);">Interactive visualisations of roadside drug test positives (BITRE) from 2008–2024.</p>
+            <p>
+              <a href="visualization.html" class="btn-secondary" style="text-decoration:none;">Open visualisations</a>
+            </p>
+            <p style="font-size:0.85rem;color:var(--muted);">Built for COS30045 — click the button to view charts.</p>
 
-      <div class="brand-block">
-        <h1 class="brand-title">Australian Police Drug Test Dashboard</h1>
-        <p class="brand-sub">
-          Roadside drug test positives from BITRE (2008–2024)
-        </p>
-      </div>
-      <div class="top-right">
-        <span class="tag">COS30045</span>
-      </div>
-    </header>
+            <section class="card" style="margin-top:1.3rem;">
+              <h2 class="card-title">About this project</h2>
 
-    <!-- NAV / FILTER BAR -->
-    <nav class="nav-bar">
-      <div class="nav-left">
-        <span class="nav-label">Years:</span>
-        <div id="yearPills" class="pill-group">
-          <!-- JS will generate toggle pills -->
-        </div>
-      </div>
-      <div class="nav-right">
-        <div class="filter-group">
-          <label class="nav-label">Jurisdiction</label>
-          <select id="jurSelect" class="nav-input" multiple></select>
-        </div>
-        <div class="filter-group">
-          <label class="nav-label">Drug type</label>
-          <select id="drugSelect" class="nav-input" multiple></select>
-        </div>
-        <div class="filter-group">
-          <label class="nav-label">Sort locations</label>
-          <select id="sortSelect" class="nav-input">
-            <option value="desc" selected>Highest first</option>
-            <option value="asc">Lowest first</option>
-            <option value="alpha">A → Z</option>
-          </select>
-        </div>
-        <button id="resetBtn" class="btn-secondary">Clear</button>
-      </div>
-    </nav>
+              <h3 style="margin:0.6rem 0 0.25rem 0;font-size:0.95rem;color:var(--navy);">Background</h3>
+              <p style="margin:0 0 0.6rem 0;color:var(--muted);">The Bureau of Infrastructure and Transport Research Economics (BITRE) has published Australian transport statistics for decades. Its road safety enforcement dataset records roadside enforcement activities (including drug testing) from 2008 onwards. Since 2023 BITRE has captured finer-grained details (location, age group, arrests, charges) that are not fully surfaced in the current Police Enforcement Dashboard.</p>
 
-   <main class="dashboard">
-      <!-- Chart 1 – Pareto -->
-      <section class="card" id="card1">
-        <h2 class="card-title">Positive tests by jurisdiction</h2>
-        <p class="card-sub">
-          Total positive roadside drug test counts by state and territory from
-          2008–2024.
-        </p>
-        <div id="chart1" class="chart-container"></div>
-        <div id="chart1-info" class="chart-info">
-          Click a bar to see the total for that jurisdiction.
-        </div>
-      </section>
+              <h3 style="margin:0.6rem 0 0.25rem 0;font-size:0.95rem;color:var(--navy);">Aim</h3>
+              <p style="margin:0 0 0.6rem 0;color:var(--muted);">Design and implement interactive visualisations that expose meaningful patterns in BITRE's enforcement data, tell a clear data-driven story, and make it easy for users to explore selected parts of the dataset.</p>
 
-      <!-- Chart 2 – Drug type map -->
-      <section class="card" id="card2">
-        <h2 class="card-title">Drug types most frequently detected</h2>
-        <p class="card-sub">
-          Each state is coloured by the drug type (e.g. cannabis, amphetamine,
-          methylamphetamine) with the highest number of positive roadside tests.
-        </p>
-        <div id="chart2" class="chart-container"></div>
-        <div id="chart2-info" class="chart-info">
-          Click a state (e.g. NT, SA) to see its top drug and count.
-        </div>
-      </section>
+              <h3 style="margin:0.6rem 0 0.25rem 0;font-size:0.95rem;color:var(--navy);">Objectives</h3>
+              <ul style="margin:0 0 0.6rem 1.1rem;color:var(--muted);">
+                <li>Allow users to explore selected aspects of the BITRE road safety enforcement data (2008–2024).</li>
+                <li>Create one or more interactive visualisations that surface trends and regional differences.</li>
+                <li>Tell a focused story about an aspect of the data using annotation and interaction.</li>
+                <li>Evaluate the usability of the visualisation with basic user testing and document findings.</li>
+                <li>Prepare the site for deployment (the assignment expects hosting on Vercel).</li>
+              </ul>
 
-      <!-- Chart 3 – Detection methods -->
+              <p style="margin:0;color:var(--muted);font-size:0.85rem;">This project is built by the course team as part of the Data Visualisation Project for the semester.</p>
+            </section>
+          </div>
+        </div>
+      </body>
+    </html>
       <section class="card" id="card3">
-        <h2 class="card-title">Detection methods contribution over time</h2>
-        <p class="card-sub">
-          How Stage&nbsp;1 (Indicator), Stage&nbsp;2 (Confirmatory), and
-          Stage&nbsp;3 (Laboratory) detection methods contribute to positive
-          outcomes from 2008–2024.
-        </p>
-        <div id="chart3" class="chart-container"></div>
-        <div id="chart3-info" class="chart-info">
-          Click on the chart to see the breakdown for a specific year.
-        </div>
-      </section>
-    </main>
-
-
-      Source: BITRE road safety enforcement (cleaned). Built for Australian police drug test visualisation.
-    </footer>
-
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="js/chart1.js"></script> <!-- Q3 -->
-    <script src="js/chart2.js"></script> <!-- Q4 -->
-    <script src="js/chart3.js"></script> <!-- Q5 -->
-
-
-  </body>
-</html>
