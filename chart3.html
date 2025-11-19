@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chart — Positive tests by jurisdiction</title>
+    <title>Positive tests by jurisdiction — Visualisation Q3</title>
     <link rel="stylesheet" href="css/style.css" />
     <script src="https://d3js.org/d3.v7.min.js"></script>
   </head>
@@ -29,7 +29,6 @@
     </main>
 
     <script src="js/chart1.js"></script>
-    <!-- floating side navigation -->
     <button id="prevFloat" aria-label="Previous chart" style="position:fixed;left:8px;top:50%;transform:translateY(-50%);z-index:60;" class="float-nav-btn">
       <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M8 4l8 8-8 8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -42,8 +41,8 @@
     </button>
     <script>
       (function(){
-        const prev = 'chart5.html';
-        const next = 'chart2.html';
+        const prev = 'chart2.html';
+        const next = 'chart4.html';
         const p = document.getElementById('prevFloat');
         const n = document.getElementById('nextFloat');
         if(p) p.addEventListener('click', ()=> location.href = prev);

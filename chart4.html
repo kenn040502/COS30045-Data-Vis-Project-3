@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Detection methods over time — Visualisation Q5</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Highest volume & positivity — Visualisation Q2</title>
     <link rel="stylesheet" href="css/style.css" />
-    <script src="https://d3js.org/d3.v7.min.js"></script>
   </head>
   <body>
     <header class="topbar">
@@ -13,8 +12,8 @@
         <img src="image/home.svg" alt="Home" class="home-icon" />
       </a>
       <div class="brand-block">
-        <h1 class="brand-title">Detection methods over time</h1>
-        <p class="brand-sub">Stage 1/2/3 contribution to positives (2008–2024)</p>
+        <h1 class="brand-title">Testing volume & positivity</h1>
+        <p class="brand-sub">Which locations recorded the highest volume and positivity?</p>
       </div>
       <div class="top-right">
         <a href="visualization.html" class="btn-secondary">All charts</a>
@@ -23,12 +22,12 @@
 
     <main class="dashboard fullscreen">
       <section class="card">
-        <div id="chart3" class="chart-container"></div>
-        <div id="chart3-info" class="chart-info">Click to lock onto a year.</div>
+        <div class="chart-container">
+          <p style="margin:1rem 0;">Placeholder for “Highest volume & positivity” visualisation (Question 2).</p>
+        </div>
       </section>
     </main>
 
-    <script src="js/chart3.js"></script>
     <button id="prevFloat" aria-label="Previous chart" style="position:fixed;left:8px;top:50%;transform:translateY(-50%);z-index:60;" class="float-nav-btn">
       <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M8 4l8 8-8 8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -41,8 +40,8 @@
     </button>
     <script>
       (function(){
-        const prev = 'chart1.html';
-        const next = 'chart3.html';
+        const prev = 'chart3.html';
+        const next = 'chart5.html';
         const p = document.getElementById('prevFloat');
         const n = document.getElementById('nextFloat');
         if(p) p.addEventListener('click', ()=> location.href = prev);
