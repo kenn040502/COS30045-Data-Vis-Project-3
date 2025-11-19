@@ -65,8 +65,9 @@
   container.selectAll("*").remove();
   const infoBox = d3.select("#chart1-info");
 
-  const width = container.node().clientWidth || 500;
-  const height = 320;
+  const bounds = container.node().getBoundingClientRect();
+  const width = bounds.width || window.innerWidth;
+  const height = bounds.height || Math.max(window.innerHeight - 160, 420);
   const margin = { top: 20, right: 50, bottom: 70, left: 75 };
 
   const svg = container
@@ -74,7 +75,8 @@
     .attr("viewBox", `0 0 ${width} ${height}`)
     .attr("preserveAspectRatio", "xMinYMin meet")
     .attr("width", "100%")
-    .attr("height", "100%");
+    .attr("height", height);
+
 
   const x = d3.scaleBand()
     .domain(agg.map(d => d.jurisdiction))

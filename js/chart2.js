@@ -108,8 +108,9 @@
     return;
   }
 
-  const width = container.node().clientWidth || 500;
-  const height = 320;
+  const bounds = container.node().getBoundingClientRect();
+  const width = bounds.width || window.innerWidth;
+  const height = bounds.height || Math.max(window.innerHeight - 160, 450);
   const margin = { top: 10, right: 10, bottom: 10, left: 10 };
 
   const svg = container
@@ -117,7 +118,8 @@
     .attr("viewBox", `0 0 ${width} ${height}`)
     .attr("preserveAspectRatio", "xMinYMin meet")
     .attr("width", "100%")
-    .attr("height", "100%");
+    .attr("height", height);
+
 
   const projection = d3.geoMercator().fitSize(
     [width - margin.left - margin.right, height - margin.top - margin.bottom],
@@ -266,20 +268,31 @@
   // legend
   const legend = svg
     .append("g")
-    .attr("transform", `translate(${width - 140},20)`);
+    .attr("transform", `translate(${width - 160}, 28)`);
 
   const legendItems = ["Amphetamine", "Cannabis", "Ecstasy"];
+  const rowHeight = 26;
 
   legend.selectAll("rect")
     .data(legendItems)
     .enter()
     .append("rect")
     .attr("x", 0)
-    .attr("y", (d, i) => i * 18)
-    .attr("width", 12)
-    .attr("height", 12)
-    .attr("rx", 2)
+    .attr("y", (d, i) => i * rowHeight)
+    .attr("width", 16)
+    .attr("height", 16)
+    .attr("rx", 3)
     .attr("fill", d => drugColorMap[d] || "#ccc");
+
+  legend.selectAll("text")
+    .data(legendItems)
+    .enter()
+    .append("text")
+    .attr("x", 24)
+    .attr("y", (d, i) => i * rowHeight + 12)
+    .text(d => d)
+    .style("font-size", "13px")
+    .style("font-weight", "600");
 
   legend.selectAll("text")
     .data(legendItems)

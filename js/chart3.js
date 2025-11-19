@@ -84,8 +84,9 @@
   container.selectAll("*").remove();
   const infoBox = d3.select("#chart3-info");
 
-  const width = container.node().clientWidth || 520;
-  const height = 320;
+  const bounds = container.node().getBoundingClientRect();
+  const width = bounds.width || window.innerWidth;
+  const height = bounds.height || Math.max(window.innerHeight - 160, 450);
   const margin = { top: 25, right: 20, bottom: 60, left: 70 };
 
   const svg = container
@@ -93,7 +94,8 @@
     .attr("viewBox", `0 0 ${width} ${height}`)
     .attr("preserveAspectRatio", "xMinYMin meet")
     .attr("width", "100%")
-    .attr("height", "100%");
+    .attr("height", height);
+
 
   const x = d3.scalePoint()
     .domain(years)
@@ -205,25 +207,26 @@
   // Legend
   const legend = svg
     .append("g")
-    .attr("transform", `translate(${width - 200},${margin.top})`);
+    .attr("transform", `translate(${width - 220}, ${margin.top})`);
 
   validStages.forEach((stage, i) => {
     const gRow = legend
       .append("g")
-      .attr("transform", `translate(0,${i * 18})`);
+      .attr("transform", `translate(0, ${i * 26})`);
 
     gRow.append("rect")
       .attr("x", 0)
-      .attr("y", -10)
-      .attr("width", 12)
-      .attr("height", 12)
+      .attr("y", -12)
+      .attr("width", 16)
+      .attr("height", 16)
       .attr("fill", color(stage));
 
     gRow.append("text")
-      .attr("x", 18)
+      .attr("x", 24)
       .attr("y", 0)
       .text(stage)
-      .style("font-size", "10px")
+      .style("font-size", "13px")
+      .style("font-weight", "600")
       .attr("alignment-baseline", "middle");
   });
 

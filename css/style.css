@@ -149,26 +149,22 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 999px;
-  border: 1px solid var(--navy-grey);
-  background: var(--white);
+  padding: 0;
+  border: none;
+  background: transparent;
   text-decoration: none;
-  transition: background 0.15s ease, transform 0.15s ease,
-    box-shadow 0.15s ease;
 }
 
 .home-btn:hover {
-  background: var(--navy-soft);
   transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
 }
 
 .home-icon {
-  width: 20px;
-  height: 20px;
+  display: block;
+  width: 250px;      /* bump size up */
+  height: auto;
 }
+
 
 .brand-block {
   display: flex;
