@@ -1,1 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Australian Police Drug Test Dashboard</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+  </head>
+  <body>
+    <!-- TOP HEADER removed on homepage -->
 
+    <!-- HERO / LANDING CTA -->
+    <section class="hero">
+      <div class="hero-inner">
+        <h1 class="hero-title">Australian Police Drug Test Dashboard</h1>
+        <p class="hero-sub">Interactive visualisations of roadside drug test positives (BITRE) from 2008–2024.</p>
+        <p>
+          <a href="menu.html" class="hero-btn">Explore Visualisation</a>
+        </p>
+      </div>
+    </section>
+
+    <!-- FEATURE: Background panel (mirrors requested design) -->
+    <section class="feature">
+      <div class="feature-inner">
+        <div class="feature-panel">
+          <div class="feature-right">
+            <h3 class="feature-heading">BACKGROUND</h3>
+            <p class="feature-lead">The Bureau of Infrastructure and Transport Research Economics (BITRE) has published Australian transport statistics for decades. Its road safety enforcement dataset records roadside enforcement activities (including drug testing) from 2008 onwards. Since 2023 BITRE has captured finer-grained details (location, age group, arrests, charges) that are not fully surfaced in the current Police Enforcement Dashboard.</p>
+
+            <p class="feature-lead">This project uses a cleaned BITRE dataset to demonstrate interactive visualisations that surface regional and temporal patterns in roadside drug test positives. The visualisations are built to support exploration and simple narrative annotation for coursework.</p>
+          </div>
+        </div>
+
+        <div class="feature-grid">
+          <div class="grid-text">
+            <h3 class="section-heading">Aims &amp; Objectives</h3>
+            <p>Our aim is to design and deliver interactive visualisations that make patterns in BITRE's roadside drug-testing data easy to discover, understand and communicate. The visualisations emphasise temporal trends, geographic variation and demographic differences so that users can form evidence-based insights quickly.</p>
+
+            <ul class="objectives-list">
+              <li>Expose long-term and seasonal trends in positive test results across Australian states and regions.</li>
+              <li>Enable focused comparisons by age group, test outcome and location through clear filtering and annotation controls.</li>
+              <li>Support exploratory analysis with intuitive interactions while preserving reproducibility and clear documentation for teaching and reporting.</li>
+              <li>Present findings in a way that supports concise, data-driven storytelling for coursework and short reports.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- About section removed as requested -->
+
+    <footer class="footer">
+      <div class="footer-copy">© 2025 COS30045 Data Visualisation Project. All rights reserved. Built by the project team.</div>
+    </footer>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="js/chart1.js"></script>
+    <script src="js/chart2.js"></script>
+    <script src="js/chart3.js"></script>
+
+  </body>
+</html>
