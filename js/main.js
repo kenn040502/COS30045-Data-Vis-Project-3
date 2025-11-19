@@ -272,8 +272,10 @@
     }
 
     const svg = container.append("svg")
-      .attr("width", width)
-      .attr("height", height);
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("preserveAspectRatio", "xMinYMin meet")
+      .attr("width", "100%")
+      .attr("height", "100%");
 
     const projection = d3.geoMercator().fitSize(
       [width - margin.left - margin.right, height - margin.top - margin.bottom],
@@ -358,8 +360,10 @@
       .filter(d => d.detection_method);
 
     const svg = container.append("svg")
-      .attr("width", width)
-      .attr("height", height);
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("preserveAspectRatio", "xMinYMin meet")
+      .attr("width", "100%")
+      .attr("height", "100%");
 
     const x = d3.scaleBand()
       .domain(grouped.map(d => d.detection_method))
@@ -425,8 +429,10 @@
     const color = d3.scaleSequential(d3.interpolateBlues).domain([0, maxVal]);
 
     const svg = container.append("svg")
-      .attr("width", width)
-      .attr("height", height);
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("preserveAspectRatio", "xMinYMin meet")
+      .attr("width", "100%")
+      .attr("height", "100%");
 
     const projection = d3.geoMercator().fitSize(
       [width - margin.left - margin.right, height - margin.top - margin.bottom],

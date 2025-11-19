@@ -8,46 +8,57 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
   </head>
   <body>
-    <!DOCTYPE html>
-    <html lang="en">
-      <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Home — Australian Police Drug Test Dashboard</title>
-        <link rel="stylesheet" href="css/style.css" />
-      </head>
-      <body>
-        <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;">
-          <div style="max-width:900px;padding:2rem;">
-            <h1 style="margin-top:0;color:#00176B;">Australian Police Drug Test Dashboard</h1>
-            <p style="color:rgba(0,0,0,0.75);">Interactive visualisations of roadside drug test positives (BITRE) from 2008–2024.</p>
-            <p>
-              <a href="visualization.html" class="btn-secondary" style="text-decoration:none;">Open visualisations</a>
-            </p>
-            <p style="font-size:0.85rem;color:var(--muted);">Built for COS30045 — click the button to view charts.</p>
+    <!-- TOP HEADER removed on homepage -->
 
-            <section class="card" style="margin-top:1.3rem;">
-              <h2 class="card-title">About this project</h2>
+    <!-- HERO / LANDING CTA -->
+    <section class="hero">
+      <div class="hero-inner">
+        <h1 class="hero-title">Australian Police Drug Test Dashboard</h1>
+        <p class="hero-sub">Interactive visualisations of roadside drug test positives (BITRE) from 2008–2024.</p>
+        <p>
+          <a href="visualization.html" class="hero-btn">Open visualisations</a>
+        </p>
+      </div>
+    </section>
 
-              <h3 style="margin:0.6rem 0 0.25rem 0;font-size:0.95rem;color:var(--navy);">Background</h3>
-              <p style="margin:0 0 0.6rem 0;color:var(--muted);">The Bureau of Infrastructure and Transport Research Economics (BITRE) has published Australian transport statistics for decades. Its road safety enforcement dataset records roadside enforcement activities (including drug testing) from 2008 onwards. Since 2023 BITRE has captured finer-grained details (location, age group, arrests, charges) that are not fully surfaced in the current Police Enforcement Dashboard.</p>
+    <!-- FEATURE: Background panel (mirrors requested design) -->
+    <section class="feature">
+      <div class="feature-inner">
+        <div class="feature-panel">
+          <div class="feature-right">
+            <h3 class="feature-heading">BACKGROUND</h3>
+            <p class="feature-lead">The Bureau of Infrastructure and Transport Research Economics (BITRE) has published Australian transport statistics for decades. Its road safety enforcement dataset records roadside enforcement activities (including drug testing) from 2008 onwards. Since 2023 BITRE has captured finer-grained details (location, age group, arrests, charges) that are not fully surfaced in the current Police Enforcement Dashboard.</p>
 
-              <h3 style="margin:0.6rem 0 0.25rem 0;font-size:0.95rem;color:var(--navy);">Aim</h3>
-              <p style="margin:0 0 0.6rem 0;color:var(--muted);">Design and implement interactive visualisations that expose meaningful patterns in BITRE's enforcement data, tell a clear data-driven story, and make it easy for users to explore selected parts of the dataset.</p>
-
-              <h3 style="margin:0.6rem 0 0.25rem 0;font-size:0.95rem;color:var(--navy);">Objectives</h3>
-              <ul style="margin:0 0 0.6rem 1.1rem;color:var(--muted);">
-                <li>Allow users to explore selected aspects of the BITRE road safety enforcement data (2008–2024).</li>
-                <li>Create one or more interactive visualisations that surface trends and regional differences.</li>
-                <li>Tell a focused story about an aspect of the data using annotation and interaction.</li>
-                <li>Evaluate the usability of the visualisation with basic user testing and document findings.</li>
-                <li>Prepare the site for deployment (the assignment expects hosting on Vercel).</li>
-              </ul>
-
-              <p style="margin:0;color:var(--muted);font-size:0.85rem;">This project is built by the course team as part of the Data Visualisation Project for the semester.</p>
-            </section>
+            <p class="feature-lead">This project uses a cleaned BITRE dataset to demonstrate interactive visualisations that surface regional and temporal patterns in roadside drug test positives. The visualisations are built to support exploration and simple narrative annotation for coursework.</p>
           </div>
         </div>
-      </body>
-    </html>
-      <section class="card" id="card3">
+
+        <div class="feature-grid">
+          <div class="grid-text">
+            <h3 class="section-heading">Aims &amp; Objectives</h3>
+            <p>Our aim is to design and deliver interactive visualisations that make patterns in BITRE's roadside drug-testing data easy to discover, understand and communicate. The visualisations emphasise temporal trends, geographic variation and demographic differences so that users can form evidence-based insights quickly.</p>
+
+            <ul class="objectives-list">
+              <li>Expose long-term and seasonal trends in positive test results across Australian states and regions.</li>
+              <li>Enable focused comparisons by age group, test outcome and location through clear filtering and annotation controls.</li>
+              <li>Support exploratory analysis with intuitive interactions while preserving reproducibility and clear documentation for teaching and reporting.</li>
+              <li>Present findings in a way that supports concise, data-driven storytelling for coursework and short reports.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- About section removed as requested -->
+
+    <footer class="footer">
+      <div class="footer-copy">© 2025 COS30045 Data Visualisation Project. All rights reserved. Built by the project team.</div>
+    </footer>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="js/chart1.js"></script>
+    <script src="js/chart2.js"></script>
+    <script src="js/chart3.js"></script>
+
+  </body>
+</html>
