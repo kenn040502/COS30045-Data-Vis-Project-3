@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Responsive D3 Chart</title>
+    </head>
+    <body>
+        <header>
+            <h1>COS30045</h1>
+        </header>
+        <main>
+            <div>
+                <!-- Chart1 -->
+                <div id="chartControls" style="text-align:center; margin-bottom:10px;">
+                    <button id="compareBtn" style="
+                        background-color:#1976d2;
+                        color:white;
+                        border:none;
+                        padding:8px 16px;
+                        border-radius:6px;
+                        cursor:pointer;
+                        font-size:14px;
+                    ">
+                        Compare 2023 & 2024 Trends
+                    </button>
+                    </div>
+                <!-- div for chart -->
+                <div id ="chart1" class="responsive-svg-container"></div>
+                <br>
+                <!--Chart 2-->
+                <div id = "chart2" class="responsive-svg-container"></div>
+                <br>
+                <!--Chart 4-->
+                <div id = "chart4" class="responsive-svg-container"></div>
+            </div>
+        </main>
+        <footer class="footer">
+            &copy; 2025 Jewel | Some code/content generated with GenAI tools
+        </footer>
+
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+        <script src="js/Chart1.js"></script>
+        <script src="js/Chart2.js"></script>
+        <script src="js/Chart4.js"></script>
+        <script src="js/load.js"></script>
+    </body>
+</html>
