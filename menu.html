@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Visualizations — Australian Police Drug Test Dashboard</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+  </head>
+  <body>
+    <main class="dashboard" style="padding-top:2.5rem;padding-bottom:2.5rem;">
+      <div class="feature-inner" style="max-width:1100px;margin:0 auto;">
+        <header style="text-align:center;margin-bottom:1.2rem;">
+          <h1 style="color:var(--navy);margin:0 0 0.4rem 0;">Visualisations</h1>
+          <p style="color:var(--muted);margin:0;">Select a chart to open it on its own page.</p>
+        </header>
+
+        <section class="viz-grid" aria-label="Chart menu">
+          <!-- 1: Drug types by jurisdiction (Q4) -->
+          <a class="viz-card" href="chart1.html">
+            <div class="viz-thumb" aria-hidden="true"></div>
+            <div class="viz-body">
+              <h4 class="viz-title">Drug types by jurisdiction</h4>
+              <p class="viz-desc">Which drug types are most frequently detected per jurisdiction?</p>
+            </div>
+          </a>
+
+          <!-- 2: Detection methods over time (Q5) -->
+          <a class="viz-card" href="chart2.html">
+            <div class="viz-thumb" aria-hidden="true"></div>
+            <div class="viz-body">
+              <h4 class="viz-title">Detection methods over time</h4>
+              <p class="viz-desc">How have Stage 1/2/3 methods contributed to positives over time?</p>
+            </div>
+          </a>
+
+          <!-- 3: Positive tests by jurisdiction (Q3) -->
+          <a class="viz-card" href="chart3.html">
+            <div class="viz-thumb" aria-hidden="true"></div>
+            <div class="viz-body">
+              <h4 class="viz-title">Positive tests by jurisdiction</h4>
+              <p class="viz-desc">How do total positive counts differ across states and territories (2008–2024)?</p>
+            </div>
+          </a>
+
+          <!-- 4: Highest volume & positivity (Q2) -->
+          <a class="viz-card" href="chart4.html">
+            <div class="viz-thumb" aria-hidden="true"></div>
+            <div class="viz-body">
+              <h4 class="viz-title">Testing volume & positivity</h4>
+              <p class="viz-desc">Which locations recorded the highest volume of tests, and what proportion were positive?</p>
+            </div>
+          </a>
+
+          <!-- 5: Age groups & outcomes (Q1) -->
+          <a class="viz-card" href="chart5.html">
+            <div class="viz-thumb" aria-hidden="true"></div>
+            <div class="viz-body">
+              <h4 class="viz-title">Age groups & outcomes</h4>
+              <p class="viz-desc">Which age groups recorded the highest number of positive detections?</p>
+            </div>
+          </a>
+
+        </section>
+
+        <p style="text-align:center;margin-top:1.4rem;"><a href="index.html" class="btn-secondary">Back to homepage</a></p>
+      </div>
+    </main>
+  </body>
+</html>

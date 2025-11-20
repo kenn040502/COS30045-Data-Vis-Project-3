@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Highest volume & positivity — Visualisation Q2</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Positive tests by jurisdiction — Visualisation Q3</title>
     <link rel="stylesheet" href="css/style.css" />
+    <script src="https://d3js.org/d3.v7.min.js"></script>
   </head>
   <body>
     <header class="topbar">
@@ -12,8 +13,8 @@
         <img src="image/home.svg" alt="Home" class="home-icon" />
       </a>
       <div class="brand-block">
-        <h1 class="brand-title">Testing volume & positivity</h1>
-        <p class="brand-sub">Which locations recorded the highest volume and positivity?</p>
+        <h1 class="brand-title">Positive tests by jurisdiction</h1>
+        <p class="brand-sub">Totals (2008–2024)</p>
       </div>
       <div class="top-right">
         <a href="menu.html" class="btn-secondary">Menu</a>
@@ -22,17 +23,12 @@
 
     <main class="dashboard fullscreen">
       <section class="card">
-        <div class="chart-container">
-          <p style="margin:1rem 0;">Placeholder for “Highest volume & positivity” visualisation (Question 2).</p>
-           <h3 style="margin:0;">Drug Test Distribution Across Jurisdictions</h3>
-            <div style="font-size:12px; color:#555; margin-top:4px;">
-                Note: Data for the Australian Capital Territory (ACT) are not shown due to constraints in projecting its location accurately on the map.
-            </div>
-        </div>
+        <div id="chart1" class="chart-container"></div>
+        <div id="chart1-info" class="chart-info">Click a bar to see totals.</div>
       </section>
     </main>
 
-    <script src="js/Chart2.js"></script>
+    <script src="js/chart1.js"></script>
     <button id="prevFloat" aria-label="Previous chart" style="position:fixed;left:8px;top:50%;transform:translateY(-50%);z-index:60;" class="float-nav-btn">
       <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M8 4l8 8-8 8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -45,8 +41,8 @@
     </button>
     <script>
       (function(){
-        const prev = 'chart3.html';
-        const next = 'chart5.html';
+        const prev = 'chart2.html';
+        const next = 'chart4.html';
         const p = document.getElementById('prevFloat');
         const n = document.getElementById('nextFloat');
         if(p) p.addEventListener('click', ()=> location.href = prev);
