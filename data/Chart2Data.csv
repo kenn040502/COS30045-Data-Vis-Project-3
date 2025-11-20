@@ -1,0 +1,7 @@
+"LOCATION","NSW Total Positive Test","VIC Total Positive Test","ACT Total Positive Test","NT Total Positive Test","QLD Total Positive Test","SA Total Positive Test","TAS Total Positive Test","WA Total Positive Test","Total Tests","Total Positive","Positive Percentage by location","NSW Total Tests","VIC Total Tests","QLD Total Tests","SA Total Tests","TAS Total Tests","WA Total Tests","NT Total Tests","ACT Total Tests"
+"Inner Regional Australia",13351,3911,0,0,0,0,0,0,36119,17262,47.79,32208,3911,0,0,0,0,0,0
+"Major Cities of Australia",15370,9192,430,0,0,0,0,0,46825,24992,53.37,37203,9192,0,0,0,0,0,430
+"Outer Regional Australia",3081,1073,0,0,0,0,0,0,8594,4154,48.34,7521,1073,0,0,0,0,0,0
+"Remote Australia",332,12,0,0,0,0,0,0,829,344,41.5,817,12,0,0,0,0,0,0
+"Unknown",728,1,0,3553,23916,10662,5010,12860,84028,56730,67.51,1478,1,23916,10662,5010,39408,3553,0
+"Very Remote Australia",42,0,0,0,0,0,0,0,98,42,42.86,98,0,0,0,0,0,0,0
