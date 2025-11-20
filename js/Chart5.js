@@ -1,7 +1,12 @@
 const drawChart1 = (data) => {
   const margin = { top: 50, right: 60, bottom: 80, left: 80 };
-  const width = 900;
-  const height = 500;
+
+  const container = d3.select("#chart1");
+  container.selectAll("*").remove();
+
+  const bounds = container.node().getBoundingClientRect();
+  const width = Math.max(320, bounds.width || 900);
+  const height = Math.max(360, bounds.height || 500);
 
   // -----------------------------
   // 1. Prepare Data
@@ -25,9 +30,12 @@ const drawChart1 = (data) => {
   // -----------------------------
   // 2. SVG Setup
   // -----------------------------
-  const svg = d3.select("#chart1")
+  const svg = container
     .append("svg")
-    .attr("viewBox", `0 0 ${width} ${height}`);
+    .attr("viewBox", `0 0 ${width} ${height}`)
+    .attr("preserveAspectRatio", "xMidYMid meet")
+    .attr("width", "100%")
+    .attr("height", "100%");
 
   const chartWidth = width - margin.left - margin.right;
   const chartHeight = height - margin.top - margin.bottom;
@@ -35,7 +43,7 @@ const drawChart1 = (data) => {
   const innerChart = svg.append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  const tooltip = d3.select("#chart1")
+  const tooltip = container
     .append("div")
     .attr("class", "tooltip")
     .style("position", "absolute")
@@ -86,9 +94,9 @@ const drawChart1 = (data) => {
     .join("rect")
     .attr("class", d => `positive-bar bar-${d.year}`)
     .attr("x", d => x1(d.year))
-    .attr("y", d => y(d.positiveValue))
+    .attr("y", chartHeight)
     .attr("width", x1.bandwidth())
-    .attr("height", d => chartHeight - y(d.positiveValue))
+    .attr("height", 0)
     .attr("fill", d => color(d.year))
     .attr("rx", 4)
     .attr("ry", 4)
@@ -104,7 +112,13 @@ const drawChart1 = (data) => {
       tooltip.style("left", event.pageX + 12 + "px")
         .style("top", event.pageY - 20 + "px");
     })
-    .on("mouseout", () => tooltip.style("opacity", 0));
+    .on("mouseout", () => tooltip.style("opacity", 0))
+    .transition()
+    .duration(800)
+    .delay((_, i) => i * 60)
+    .ease(d3.easeCubicOut)
+    .attr("y", d => y(d.positiveValue))
+    .attr("height", d => chartHeight - y(d.positiveValue));
 
   // -----------------------------
   // 5. Axes

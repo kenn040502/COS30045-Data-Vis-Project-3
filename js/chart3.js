@@ -1,12 +1,12 @@
 // js/chart3.js
-// Chart 3 – Stacked area chart of detection methods over time (2008–2024)
+// Chart 3 - Stacked area chart of detection methods over time (2008-2024)
 
 (async function () {
   let rows;
   try {
-    rows = await d3.csv("cleanedData.csv");
+    rows = await d3.csv("data/cleanedData.csv");
   } catch (err) {
-    console.error("chart3 – CSV load error:", err);
+    console.error("chart3 - CSV load error:", err);
     d3.select("#chart3")
       .append("div")
       .style("padding", "0.75rem")
@@ -15,6 +15,7 @@
     return;
   }
 
+  // Parse and categorise detection stages
   rows.forEach(d => {
     d.year = +(d.YEAR || d.year || 0);
     d.positive_count = +(
@@ -30,15 +31,15 @@
 
     let stage;
     if (detLower.includes("indicator") || detLower.includes("stage 1")) {
-      stage = "Stage 1 – Indicator";
+      stage = "Stage 1 - Indicator";
     } else if (detLower.includes("confirm") || detLower.includes("stage 2")) {
-      stage = "Stage 2 – Confirmatory";
+      stage = "Stage 2 - Confirmatory";
     } else if (
       detLower.includes("lab") ||
       detLower.includes("toxicology") ||
       detLower.includes("stage 3")
     ) {
-      stage = "Stage 3 – Laboratory";
+      stage = "Stage 3 - Laboratory";
     } else {
       stage = "Other / NA";
     }
@@ -46,9 +47,9 @@
   });
 
   const validStages = [
-    "Stage 1 – Indicator",
-    "Stage 2 – Confirmatory",
-    "Stage 3 – Laboratory"
+    "Stage 1 - Indicator",
+    "Stage 2 - Confirmatory",
+    "Stage 3 - Laboratory"
   ];
 
   rows = rows.filter(
@@ -96,7 +97,6 @@
     .attr("width", "100%")
     .attr("height", height);
 
-
   const x = d3.scalePoint()
     .domain(years)
     .range([margin.left, width - margin.right])
@@ -113,7 +113,7 @@
     .domain(validStages)
     .range([
       "#00176B",
-      "rgba(0, 23, 107, 0.6)",
+      "rgba(0, 23, 107, 0.65)",
       "rgba(0, 23, 107, 0.3)"
     ]);
 
@@ -121,6 +121,12 @@
     .x((d, i) => x(dataByYear[i].year))
     .y0(d => y(d[0]))
     .y1(d => y(d[1]))
+    .curve(d3.curveMonotoneX);
+
+  const areaAtBottom = d3.area()
+    .x((d, i) => x(dataByYear[i].year))
+    .y0(() => y(0))
+    .y1(() => y(0))
     .curve(d3.curveMonotoneX);
 
   const stageGroup = svg.selectAll("path.stage-area")
@@ -133,9 +139,14 @@
     .append("path")
     .attr("class", "stage-area")
     .attr("fill", d => color(d.key))
-    .attr("fill-opacity", 0.5)
+    .attr("fill-opacity", 0.55)
     .attr("stroke", "#ffffff")
     .attr("stroke-width", 0.7)
+    .attr("d", areaAtBottom)
+    .transition()
+    .duration(900)
+    .delay((_, i) => i * 120)
+    .ease(d3.easeCubicOut)
     .attr("d", area);
 
   const tooltip = container
@@ -171,12 +182,15 @@
     const parts = validStages.map(stage =>
       `${stage} = ${dataByYear[idx][stage].toLocaleString()}`
     );
-    infoBox.html(`<strong>${year}</strong> – ${parts.join("; ")}`);
+    infoBox.html(`<strong>${year}</strong> — ${parts.join("; ")}`);
   }
 
-  // selection line
+  // selection line that tracks the pointer/click
   const selectionLine = svg.append("line")
     .attr("class", "selection-line")
+    .attr("stroke", "#0f172a")
+    .attr("stroke-width", 1.2)
+    .attr("stroke-dasharray", "4 3")
     .style("display", "none");
 
   // X axis (store references to ticks for selection)
@@ -254,9 +268,25 @@
         .html(html)
         .style("left", mx + 8 + "px")
         .style("top", my + 8 + "px");
+
+      updateInfoForIndex(idx);
+
+      xAxisText.classed("selected", function (d) {
+        return d === year;
+      });
+
+      const xPos = x(year);
+      selectionLine
+        .style("display", null)
+        .attr("x1", xPos)
+        .attr("x2", xPos)
+        .attr("y1", margin.top)
+        .attr("y2", height - margin.bottom);
     })
     .on("mouseleave", () => {
       tooltip.style("opacity", 0);
+      selectionLine.style("display", "none");
+      xAxisText.classed("selected", false);
     })
     .on("click", (event) => {
       const [mx] = d3.pointer(event, containerNode);
@@ -277,4 +307,9 @@
         .attr("y1", margin.top)
         .attr("y2", height - margin.bottom);
     });
+
+  // Seed info panel with the latest year
+  if (dataByYear.length) {
+    updateInfoForIndex(dataByYear.length - 1);
+  }
 })();

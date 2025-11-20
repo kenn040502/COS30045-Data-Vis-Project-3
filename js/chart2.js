@@ -1,15 +1,15 @@
 // js/chart2.js
-// Chart 2 – Which drug types are most frequently detected in each jurisdiction
+// Chart 2 - Which drug types are most frequently detected in each jurisdiction (map)
 
 (async function () {
   let rows, geo;
   try {
     [rows, geo] = await Promise.all([
-      d3.csv("cleanedData.csv"),
+      d3.csv("data/cleanedData.csv"),
       d3.json("australian-states.json")
     ]);
   } catch (err) {
-    console.error("chart2 – data load error:", err);
+    console.error("chart2 - data load error:", err);
     d3.select("#chart2")
       .append("div")
       .style("padding", "0.75rem")
@@ -36,12 +36,11 @@
 
   const DRUG_COLS = ["AMPHETAMINE", "CANNABIS", "ECSTASY"];
 
-    const drugColorMap = {
+  const drugColorMap = {
     Amphetamine: "#f97316", // orange
     Cannabis:    "#22c55e", // green
     Ecstasy:     "#6366f1"  // blue
-    };
-
+  };
 
   rows.forEach(d => {
     d.year = +(d.year || d.YEAR || 0);
@@ -104,14 +103,14 @@
       .append("div")
       .style("padding", "0.75rem")
       .style("font-size", "0.8rem")
-      .text("GeoJSON has no features – cannot draw map.");
+      .text("GeoJSON has no features — cannot draw map.");
     return;
   }
 
   const bounds = container.node().getBoundingClientRect();
   const width = bounds.width || window.innerWidth;
   const height = bounds.height || Math.max(window.innerHeight - 160, 450);
-  const margin = { top: 10, right: 10, bottom: 10, left: 10 };
+  const margin = { top: 8, right: 8, bottom: 8, left: 8 };
 
   const svg = container
     .append("svg")
@@ -119,7 +118,6 @@
     .attr("preserveAspectRatio", "xMinYMin meet")
     .attr("width", "100%")
     .attr("height", height);
-
 
   const projection = d3.geoMercator().fitSize(
     [width - margin.left - margin.right, height - margin.top - margin.bottom],
@@ -154,7 +152,7 @@
 
     let html = "";
     if (abbrev) {
-      html += `<strong>${abbrev} – ${stateName}</strong><br>`;
+      html += `<strong>${abbrev} — ${stateName}</strong><br>`;
     } else {
       html += `<strong>${stateName}</strong><br>`;
     }
@@ -178,128 +176,79 @@
 
   function updateInfoBoxFromFeature(d) {
     const stateName = d.properties.STATE_NAME;
-    const abbrev = stateNameToAbbrev[stateName] || "";
+    const abbrev = stateNameToAbbrev[stateName] || stateName;
     const info = topByState.get(stateName);
-
-    if (!info) {
+    if (info) {
       infoBox.html(
-        `<strong>${stateName}</strong>: no positives recorded for these drugs.`
+        `<strong>${abbrev}</strong>: ${info.drug} (${info.total.toLocaleString()} positives)`
       );
-      return;
+    } else {
+      infoBox.html(`<strong>${abbrev}</strong>: No positives recorded for these drugs`);
     }
-
-    infoBox.html(
-      `<strong>${abbrev ? abbrev + " – " : ""}${stateName}</strong>: ` +
-      `${info.drug} is most frequently detected ` +
-      `(${info.total.toLocaleString()} positives).`
-    );
   }
 
-  function selectState(stateName) {
-    g.selectAll("path.state-region")
-      .classed("selected", d => d.properties.STATE_NAME === stateName);
-
-    const fakeFeature = { properties: { STATE_NAME: stateName } };
-    updateInfoBoxFromFeature(fakeFeature);
-  }
-
-  // polygons
-  g.selectAll("path.state-region")
+  // Draw states with fade-in animation
+  const states = g.selectAll("path.state")
     .data(geo.features)
     .enter()
     .append("path")
     .attr("class", "state-region")
     .attr("d", path)
-    .attr("stroke", "#ffffff")
-    .attr("stroke-width", 1)
     .attr("fill", d => {
-      const stateName = d.properties.STATE_NAME;
-      const info = topByState.get(stateName);
-      if (!info) return "#eeeeee";
-      return drugColorMap[info.drug] || "#cccccc";
+      const info = topByState.get(d.properties.STATE_NAME);
+      return info ? drugColorMap[info.drug] : "#f4f4f4";
     })
+    .attr("stroke", "#e5e7eb")
+    .attr("stroke-width", 1)
+    .attr("opacity", 0)
     .on("mousemove", showTooltip)
-    .on("mouseenter", showTooltip)
-    .on("mouseleave", hideTooltip)
-    .on("click", (event, d) => {
-      const stateName = d.properties.STATE_NAME;
-      selectState(stateName);
-    });
-
-  // labels
-  g.selectAll("text.state-label")
-    .data(geo.features)
-    .enter()
-    .append("text")
-    .attr("class", "state-label")
-    .attr("transform", d => {
-      const [x, y] = path.centroid(d);
-      return `translate(${x},${y})`;
+    .on("mouseenter", function (event, d) {
+      showTooltip(event, d);
+      updateInfoBoxFromFeature(d);
+      d3.select(this)
+        .transition()
+        .duration(200)
+        .attr("stroke", "#111827")
+        .attr("stroke-width", 1.8);
     })
-    .attr("text-anchor", "middle")
-    .style("pointer-events", "none")
-    .style("font-size", "11px")
-    .style("font-weight", "700")
-    .style("fill", "#000000")
-    .each(function (d) {
-      const stateName = d.properties.STATE_NAME;
-      const abbrev = stateNameToAbbrev[stateName] || "";
-      const text = d3.select(this);
-
-      if (abbrev) {
-        text.append("tspan")
-          .attr("x", 0)
-          .attr("dy", "-0.2em")
-          .text(abbrev);
-        text.append("tspan")
-          .attr("x", 0)
-          .attr("dy", "1.2em")
-          .style("font-size", "9px")
-          .style("font-weight", "600")
-          .text(stateName.split(" ").slice(0, 2).join(" "));
-      } else {
-        text.append("tspan")
-          .attr("x", 0)
-          .attr("dy", "0.3em")
-          .text(stateName);
-      }
+    .on("mouseleave", function () {
+      hideTooltip();
+      d3.select(this)
+        .transition()
+        .duration(200)
+        .attr("stroke", "#e5e7eb")
+        .attr("stroke-width", 1);
+    })
+    .on("click", (event, d) => {
+      updateInfoBoxFromFeature(d);
     });
 
-  // legend
-  const legend = svg
-    .append("g")
-    .attr("transform", `translate(${width - 160}, 28)`);
+  states
+    .transition()
+    .duration(750)
+    .delay((_, i) => i * 60)
+    .attr("opacity", 1);
 
-  const legendItems = ["Amphetamine", "Cannabis", "Ecstasy"];
-  const rowHeight = 26;
+  // Legend
+  const legend = svg.append("g")
+    .attr("transform", `translate(${width - 170}, ${margin.top + 10})`);
 
-  legend.selectAll("rect")
-    .data(legendItems)
-    .enter()
-    .append("rect")
-    .attr("x", 0)
-    .attr("y", (d, i) => i * rowHeight)
-    .attr("width", 16)
-    .attr("height", 16)
-    .attr("rx", 3)
-    .attr("fill", d => drugColorMap[d] || "#ccc");
+  ["Amphetamine", "Cannabis", "Ecstasy"].forEach((drug, i) => {
+    const row = legend.append("g").attr("transform", `translate(0, ${i * 22})`);
+    row.append("rect")
+      .attr("width", 14)
+      .attr("height", 14)
+      .attr("rx", 3)
+      .attr("fill", drugColorMap[drug]);
+    row.append("text")
+      .attr("x", 20)
+      .attr("y", 11)
+      .style("font-size", "12px")
+      .style("font-weight", "600")
+      .text(drug);
+  });
 
-  legend.selectAll("text")
-    .data(legendItems)
-    .enter()
-    .append("text")
-    .attr("x", 24)
-    .attr("y", (d, i) => i * rowHeight + 12)
-    .text(d => d)
-    .style("font-size", "13px")
-    .style("font-weight", "600");
-
-  legend.selectAll("text")
-    .data(legendItems)
-    .enter()
-    .append("text")
-    .attr("x", 18)
-    .attr("y", (d, i) => i * 18 + 10)
-    .text(d => d)
-    .style("font-size", "10px");
+  // Seed info with NSW (or first available)
+  const initialFeature = geo.features.find(f => f.properties.STATE_NAME === "New South Wales") || geo.features[0];
+  if (initialFeature) updateInfoBoxFromFeature(initialFeature);
 })();

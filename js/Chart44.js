@@ -74,13 +74,17 @@ function createRadar(allData, containerSelector) {
     const container = d3.select(containerSelector);
     container.selectAll("*").remove();
 
-    const width = 420;
-    const height = 360;
-    const radius = 120;
+    const bounds = container.node().getBoundingClientRect();
+    const width = Math.max(360, bounds.width || 420);
+    const height = Math.max(320, bounds.height || 360);
+    const radius = Math.min(width, height) * 0.42;
 
     const svg = container
         .append("svg")
-        .attr("viewBox", `0 0 ${width} ${height}`);
+        .attr("viewBox", `0 0 ${width} ${height}`)
+        .attr("preserveAspectRatio", "xMidYMid meet")
+        .attr("width", "100%")
+        .attr("height", "100%");
 
     const g = svg
         .append("g")
@@ -246,12 +250,16 @@ function createLocationMap(allData, geoData, containerSelector) {
     const container = d3.select(containerSelector);
     container.selectAll("*").remove();
 
-    const width = 420;
-    const height = 360;
+    const bounds = container.node().getBoundingClientRect();
+    const width = Math.max(360, bounds.width || 420);
+    const height = Math.max(320, bounds.height || 360);
 
     const svg = container
         .append("svg")
-        .attr("viewBox", `0 0 ${width} ${height}`);
+        .attr("viewBox", `0 0 ${width} ${height}`)
+        .attr("preserveAspectRatio", "xMidYMid meet")
+        .attr("width", "100%")
+        .attr("height", "100%");
 
     const projection = d3.geoMercator();
     try {

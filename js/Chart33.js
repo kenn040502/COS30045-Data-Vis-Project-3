@@ -1,15 +1,23 @@
 function drawChart4(data, geoData) {
 
-  d3.select("#chart4").selectAll("*").remove();
+  const container = d3.select("#chart4");
+  container.selectAll("*").remove();
 
-  const width = 900;
-  const height = 700;
+  const bounds = container.node().getBoundingClientRect();
+  const width = Math.max(400, bounds.width || 900);
+  const height = Math.max(400, bounds.height || 700);
 
-  const svg = d3.select("#chart4").append("svg")
-    .attr("viewBox", `0 0 ${width} ${height}`);
+  const svg = container.append("svg")
+    .attr("viewBox", `0 0 ${width} ${height}`)
+    .attr("preserveAspectRatio", "xMidYMid meet")
+    .attr("width", "100%")
+    .attr("height", "100%");
+
+  // Group for all map layers (enables zoom/pan)
+  const mapGroup = svg.append("g").attr("class", "map-group");
 
   // Tooltip
-  const tooltip = d3.select("#chart4").append("div")
+  const tooltip = container.append("div")
     .attr("class", "tooltip")
     .style("position", "absolute")
     .style("background", "rgba(255,255,255,0.95)")
@@ -141,7 +149,7 @@ function drawChart4(data, geoData) {
   let selected = null;
 
   // Draw states
-  const states = svg.selectAll("path")
+  const states = mapGroup.selectAll("path")
     .data(geoData.features)
     .join("path")
     .attr("d", path)
@@ -152,7 +160,14 @@ function drawChart4(data, geoData) {
     })
     .attr("stroke", defaultStroke)
     .attr("stroke-width", 0.8)
+    .attr("opacity", 0)
     .style("cursor", "pointer");
+
+  // Fade states in sequentially
+  states.transition()
+    .duration(650)
+    .delay((_, i) => i * 80)
+    .attr("opacity", 1);
 
   // Hover
   states.on("mouseenter", function (event, d) {
@@ -406,7 +421,7 @@ function drawChart4(data, geoData) {
   });
 
   // Labels
-  svg.selectAll(".state-label")
+  mapGroup.selectAll(".state-label")
     .data(geoData.features)
     .join("text")
     .attr("class", "state-label")
@@ -424,4 +439,12 @@ function drawChart4(data, geoData) {
     .style("fill", "#555")
     .text("Note: Data prior to 2021 and NT data (2023-2024) unavailable due to data quality issues. NSW confirmatory testing discontinued since Sept 2024.")
     .text("Note: Data for Australia Capital Territory data are not shown due to the constraints on showing its location on the map.");
+
+  // Zoom + pan interaction
+  const zoom = d3.zoom()
+    .scaleExtent([0.8, 3])
+    .translateExtent([[0, 0], [width, height]])
+    .on("zoom", (event) => mapGroup.attr("transform", event.transform));
+
+  svg.call(zoom);
 }

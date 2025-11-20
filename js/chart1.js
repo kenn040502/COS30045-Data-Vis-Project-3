@@ -1,12 +1,12 @@
 // js/chart1.js
-// Chart 1 – Pareto chart of total positive counts by jurisdiction (2008–2024)
+// Chart 1 - Pareto chart of total positive counts by jurisdiction (2008-2024)
 
 (async function () {
   let rows;
   try {
-    rows = await d3.csv("cleanedData.csv");
+    rows = await d3.csv("data/cleanedData.csv");
   } catch (err) {
-    console.error("chart1 – CSV load error:", err);
+    console.error("chart1 - CSV load error:", err);
     d3.select("#chart1")
       .append("div")
       .style("padding", "0.75rem")
@@ -65,6 +65,18 @@
   container.selectAll("*").remove();
   const infoBox = d3.select("#chart1-info");
 
+  const tooltip = container
+    .append("div")
+    .style("position", "absolute")
+    .style("background", "rgba(0,0,0,0.85)")
+    .style("color", "#fff")
+    .style("padding", "6px 10px")
+    .style("border-radius", "6px")
+    .style("font-size", "0.8rem")
+    .style("pointer-events", "none")
+    .style("box-shadow", "0 8px 16px rgba(0,0,0,0.25)")
+    .style("opacity", 0);
+
   const bounds = container.node().getBoundingClientRect();
   const width = bounds.width || window.innerWidth;
   const height = bounds.height || Math.max(window.innerHeight - 160, 420);
@@ -76,7 +88,6 @@
     .attr("preserveAspectRatio", "xMinYMin meet")
     .attr("width", "100%")
     .attr("height", height);
-
 
   const x = d3.scaleBand()
     .domain(agg.map(d => d.jurisdiction))
@@ -92,68 +103,109 @@
     .domain([0, 100])
     .range([height - margin.bottom, margin.top]);
 
-  function selectJurisdiction(jur) {
-    svg.selectAll("rect.bar")
-      .classed("selected", d => d.jurisdiction === jur);
-
-    svg.selectAll("circle.pareto-point")
-      .classed("selected", d => d.jurisdiction === jur);
-
+  function updateInfo(jur) {
     const selected = agg.find(d => d.jurisdiction === jur);
     if (selected) {
       infoBox.html(
-        `<strong>${selected.jurisdiction} – ${selected.name}</strong>: ` +
+        `<strong>${selected.jurisdiction} - ${selected.name}</strong>: ` +
         `${selected.total.toLocaleString()} positives ` +
         `(${selected.cumPct.toFixed(1)}% cumulative)`
       );
     }
   }
 
-  // Bars
-  svg.selectAll("rect.bar")
+  // Bars with grow-in animation
+  const bars = svg.selectAll("rect.bar")
     .data(agg)
     .enter()
     .append("rect")
     .attr("class", "bar")
     .attr("x", d => x(d.jurisdiction))
-    .attr("y", d => yLeft(d.total))
+    .attr("y", yLeft(0))
     .attr("width", x.bandwidth())
-    .attr("height", d => height - margin.bottom - yLeft(d.total))
+    .attr("height", 0)
     .attr("fill", "#00176B")
-    .on("click", (event, d) => selectJurisdiction(d.jurisdiction))
-    .append("title")
-    .text(d =>
-      `${d.jurisdiction} – ${d.name}\nTotal positives: ${d.total.toLocaleString()}`
-    );
+    .attr("opacity", 0.9)
+    .on("mouseenter", (event, d) => {
+      svg.selectAll("rect.bar").attr("opacity", b => b.jurisdiction === d.jurisdiction ? 1 : 0.35);
+      svg.selectAll("circle.pareto-point").attr("opacity", b => b.jurisdiction === d.jurisdiction ? 1 : 0.4);
+      tooltip
+        .style("opacity", 1)
+        .html(
+          `<strong>${d.jurisdiction} - ${d.name}</strong><br>` +
+          `Total positives: ${d.total.toLocaleString()}<br>` +
+          `Cumulative: ${d.cumPct.toFixed(1)}%`
+        )
+        .style("left", (x(d.jurisdiction) + x.bandwidth() / 2) + "px")
+        .style("top", yLeft(d.total) - 12 + "px");
+      updateInfo(d.jurisdiction);
+    })
+    .on("mouseleave", () => {
+      svg.selectAll("rect.bar").attr("opacity", 0.9);
+      svg.selectAll("circle.pareto-point").attr("opacity", 1);
+      tooltip.style("opacity", 0);
+    })
+    .on("click", (event, d) => updateInfo(d.jurisdiction));
 
-  // Pareto line
+  bars.transition()
+    .duration(800)
+    .delay((_, i) => i * 60)
+    .ease(d3.easeCubicOut)
+    .attr("y", d => yLeft(d.total))
+    .attr("height", d => height - margin.bottom - yLeft(d.total));
+
+  // Pareto line with stroke-draw animation
   const line = d3.line()
     .x(d => x(d.jurisdiction) + x.bandwidth() / 2)
     .y(d => yRight(d.cumPct))
     .curve(d3.curveMonotoneX);
 
-    svg.append("path")
+  const paretoPath = svg.append("path")
     .datum(agg)
     .attr("fill", "none")
-    .attr("stroke", "#f97316")   // orange cumulative curve
+    .attr("stroke", "#f97316")
     .attr("stroke-width", 2)
     .attr("d", line);
 
-  // Pareto points
-  svg.selectAll("circle.pareto-point")
+  const totalLen = paretoPath.node().getTotalLength();
+  paretoPath
+    .attr("stroke-dasharray", `${totalLen} ${totalLen}`)
+    .attr("stroke-dashoffset", totalLen)
+    .transition()
+    .duration(900)
+    .delay(200)
+    .ease(d3.easeCubicOut)
+    .attr("stroke-dashoffset", 0);
+
+  const paretoPoints = svg.selectAll("circle.pareto-point")
     .data(agg)
     .enter()
     .append("circle")
     .attr("class", "pareto-point")
     .attr("cx", d => x(d.jurisdiction) + x.bandwidth() / 2)
     .attr("cy", d => yRight(d.cumPct))
-    .attr("r", 3)
-    .attr("fill", "#f97316") // orange points to match the curve
-    .on("click", (event, d) => selectJurisdiction(d.jurisdiction))
-    .append("title")
-    .text(d =>
-      `${d.jurisdiction} – ${d.name}\nCumulative: ${d.cumPct.toFixed(1)}%`
-    );
+    .attr("r", 0)
+    .attr("fill", "#f97316")
+    .on("mouseenter", (event, d) => {
+      tooltip
+        .style("opacity", 1)
+        .html(
+          `<strong>${d.jurisdiction} - ${d.name}</strong><br>` +
+          `Cumulative: ${d.cumPct.toFixed(1)}%`
+        )
+        .style("left", (x(d.jurisdiction) + x.bandwidth() / 2) + "px")
+        .style("top", yRight(d.cumPct) - 14 + "px");
+      updateInfo(d.jurisdiction);
+    })
+    .on("mouseleave", () => tooltip.style("opacity", 0))
+    .on("click", (event, d) => updateInfo(d.jurisdiction));
+
+  paretoPoints
+    .transition()
+    .duration(600)
+    .delay((_, i) => 250 + i * 60)
+    .ease(d3.easeBackOut)
+    .attr("r", 3);
 
   // Axes
   svg.append("g")
@@ -201,4 +253,9 @@
     .style("font-size", "10px")
     .style("fill", "rgba(0, 23, 107, 0.6)")
     .text("80% cumulative");
+
+  // Seed the info panel with the top jurisdiction
+  if (agg.length) {
+    updateInfo(agg[0].jurisdiction);
+  }
 })();
