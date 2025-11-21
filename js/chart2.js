@@ -144,7 +144,9 @@
     .attr("fill-opacity", 0.55)
     .attr("stroke", "#ffffff")
     .attr("stroke-width", 0.7)
-    .attr("d", areaAtBottom)
+    .attr("d", areaAtBottom);
+
+  stagePaths
     .transition()
     .duration(900)
     .delay((_, i) => i * 120)
@@ -248,11 +250,17 @@
     .attr("alignment-baseline", "middle")
     .attr("fill", "#1f2937");
 
+  legendRows
+    .on("mouseenter", (_, d) => setActiveStage(d))
+    .on("mouseleave", () => setActiveStage(null));
+
   function setActiveStage(stageKey) {
-    stagePaths.attr("fill-opacity", d => {
-      if (!stageKey) return 0.55;
-      return d.key === stageKey ? 0.8 : 0.15;
-    });
+    stagePaths
+      .attr("fill-opacity", d => {
+        if (!stageKey) return 0.55;
+        return d.key === stageKey ? 0.9 : 0.15;
+      })
+      .attr("stroke-width", d => stageKey && d.key === stageKey ? 1.1 : 0.7);
 
     legendRows.selectAll("rect")
       .attr("opacity", d => (!stageKey || d === stageKey) ? 1 : 0.35);

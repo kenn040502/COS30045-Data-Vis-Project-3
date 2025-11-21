@@ -62,6 +62,7 @@
   });
 
   const container = d3.select("#chart1");
+  container.style("position", "relative");
   container.selectAll("*").remove();
   const infoBox = d3.select("#chart1-info");
 
@@ -127,6 +128,7 @@
     .attr("fill", "#00176B")
     .attr("opacity", 0.9)
     .on("mouseenter", (event, d) => {
+      const [mx, my] = d3.pointer(event, container.node());
       svg.selectAll("rect.bar").attr("opacity", b => b.jurisdiction === d.jurisdiction ? 1 : 0.35);
       svg.selectAll("circle.pareto-point").attr("opacity", b => b.jurisdiction === d.jurisdiction ? 1 : 0.4);
       tooltip
@@ -136,9 +138,15 @@
           `Total positives: ${d.total.toLocaleString()}<br>` +
           `Cumulative: ${d.cumPct.toFixed(1)}%`
         )
-        .style("left", (x(d.jurisdiction) + x.bandwidth() / 2) + "px")
-        .style("top", yLeft(d.total) - 12 + "px");
+        .style("left", (mx + 8) + "px")
+        .style("top", (my - 18) + "px");
       updateInfo(d.jurisdiction);
+    })
+    .on("mousemove", (event) => {
+      const [mx, my] = d3.pointer(event, container.node());
+      tooltip
+        .style("left", (mx + 8) + "px")
+        .style("top", (my - 18) + "px");
     })
     .on("mouseleave", () => {
       svg.selectAll("rect.bar").attr("opacity", 0.9);
@@ -187,15 +195,22 @@
     .attr("r", 0)
     .attr("fill", "#f97316")
     .on("mouseenter", (event, d) => {
+      const [mx, my] = d3.pointer(event, container.node());
       tooltip
         .style("opacity", 1)
         .html(
           `<strong>${d.jurisdiction} - ${d.name}</strong><br>` +
           `Cumulative: ${d.cumPct.toFixed(1)}%`
         )
-        .style("left", (x(d.jurisdiction) + x.bandwidth() / 2) + "px")
-        .style("top", yRight(d.cumPct) - 14 + "px");
+        .style("left", (mx + 8) + "px")
+        .style("top", (my - 18) + "px");
       updateInfo(d.jurisdiction);
+    })
+    .on("mousemove", (event) => {
+      const [mx, my] = d3.pointer(event, container.node());
+      tooltip
+        .style("left", (mx + 8) + "px")
+        .style("top", (my - 18) + "px");
     })
     .on("mouseleave", () => tooltip.style("opacity", 0))
     .on("click", (event, d) => updateInfo(d.jurisdiction));
