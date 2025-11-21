@@ -23,11 +23,26 @@
 
     <main class="dashboard fullscreen">
       <section class="card">
+        <h1 style="margin:20px; text-align: center;">Dominant Drug-Positive Roadside Tests by Jurisdiction</h1>
+        <p style="font-size:18px; color:#333; line-height:1.2; margin:15px 0 20px 0; background:#f9fafc; padding:14px 18px; border-left:4px solid #4e79a7; border-radius:6px;">
+          Explore the interactive map to understand which drug types are most frequently detected 
+          across Australian jurisdictions. Each state is coloured by its dominant positive roadside 
+          drug detection based on aggregated test data. Hover over a state to view detailed 
+          positivity percentages for each drug type.
+          <br><br>
+          Click on any state to reveal a breakdown panel showing the exact proportion of 
+          Amphetamine, Cannabis, Ecstasy, and Methylamphetamine detections within that jurisdiction. 
+          Unselected states will dim automatically, helping you focus attention on the selected region.
+          <br><br>
+          The gradient fill displayed after clicking a state illustrates the relative contribution 
+          of each drug type. This enables easy comparison of drug prevalence patterns across the 
+          country, giving a comprehensive view of drug-related roadside testing outcomes.
+        </p>
         <div id="chart4" class="responsive-svg-container"></div>
       </section>
     </main>
 
-    <script src="js/Chart33.js"></script>
+    <script src="js/chart1.js"></script>
     <script src="js/LoadData.js"></script>
     <button id="prevFloat" aria-label="Previous chart" style="position:fixed;left:8px;top:50%;transform:translateY(-50%);z-index:60;" class="float-nav-btn">
       <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

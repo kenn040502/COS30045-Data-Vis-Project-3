@@ -23,13 +23,32 @@
 
     <main class="dashboard fullscreen">
       <section class="card">
+        <div style="background:#f8faff; border-left:4px solid #00176B; padding:14px 18px; margin:15px 0 18px 0;
+          font-size:18px;line-height:1.2;">
+          <strong style="font-size:18px; color:#00176B;">
+            How to interpret this visualisation:
+          </strong>
+          <br><br>
+          This interactive chart displays the <strong>total number of positive roadside drug test results</strong> across all age groups
+          from 2008 to 2024.  
+          <br><br>
+          • The <strong>Compare 2023 & 2024 Trends button</strong> allows you to compare the overall scale of enforcement activity between 2023 and 2024.<br>
+          • The <strong>Pareto bars</strong> show the number of positive results for each age group.<br>
+          • The <strong>Pareto line</strong> reveals how each age group contributes cumulatively to all positive detections.<br><br>
+          Hover over the bars and line points to view exact values.  
+        </div>
+        <div id="chartControls" style="text-align:center; margin-bottom:10px;">
+          <button id="compareBtn" style="background-color:#1976d2; color:white; border:none; padding:8px 16px;
+              border-radius:6px; cursor:pointer; font-size:14px;">Compare 2023 & 2024 Trends
+          </button>
+        </div>
         <div class="chart-container">
           <div id="chart1" class="responsive-svg-container"></div>
         </div>
       </section>
     </main>
 
-    <script src="js/Chart5.js"></script>
+    <script src="js/chart5.js"></script>
     <script src="js/LoadData.js"></script>
     <button id="prevFloat" aria-label="Previous chart" style="position:fixed;left:8px;top:50%;transform:translateY(-50%);z-index:60;" class="float-nav-btn">
       <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

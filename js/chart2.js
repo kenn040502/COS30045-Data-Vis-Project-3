@@ -1,50 +1,23 @@
-// js/chart2.js
-// Chart 2 - Which drug types are most frequently detected in each jurisdiction (map)
+// js/chart3.js
+// Chart 3 - Stacked area chart of detection methods over time (2008-2024)
 
 (async function () {
-  let rows, geo;
+  let rows;
   try {
-    [rows, geo] = await Promise.all([
-      d3.csv("data/cleanedData.csv"),
-      d3.json("australian-states.json")
-    ]);
+    rows = await d3.csv("data/cleanedData.csv");
   } catch (err) {
-    console.error("chart2 - data load error:", err);
-    d3.select("#chart2")
+    console.error("chart3 - CSV load error:", err);
+    d3.select("#chart3")
       .append("div")
       .style("padding", "0.75rem")
       .style("font-size", "0.8rem")
-      .text("Could not load cleanedData.csv or australian-states.json");
+      .text("Could not load cleanedData.csv for detection chart.");
     return;
   }
 
-  const jurisToStateName = {
-    NSW: "New South Wales",
-    VIC: "Victoria",
-    QLD: "Queensland",
-    SA:  "South Australia",
-    WA:  "Western Australia",
-    TAS: "Tasmania",
-    NT:  "Northern Territory",
-    ACT: "Australian Capital Territory"
-  };
-
-  const stateNameToAbbrev = {};
-  Object.entries(jurisToStateName).forEach(([abbr, name]) => {
-    stateNameToAbbrev[name] = abbr;
-  });
-
-  const DRUG_COLS = ["AMPHETAMINE", "CANNABIS", "ECSTASY"];
-
-  const drugColorMap = {
-    Amphetamine: "#f97316", // orange
-    Cannabis:    "#22c55e", // green
-    Ecstasy:     "#6366f1"  // blue
-  };
-
+  // Parse and categorise detection stages
   rows.forEach(d => {
-    d.year = +(d.year || d.YEAR || 0);
-    d.jurisdiction = (d.JURISDICTION || d.jurisdiction || "").trim();
+    d.year = +(d.YEAR || d.year || 0);
     d.positive_count = +(
       d.COUNT ||
       d.count ||
@@ -52,65 +25,70 @@
       d.positive_count ||
       0
     );
+    const rawDet =
+      (d.DETECTION_METHOD || d.DETECTION || d.detection || "").toString();
+    const detLower = rawDet.toLowerCase();
 
-    DRUG_COLS.forEach(col => {
-      const v = (d[col] || d[col.toLowerCase()] || "")
-        .toString()
-        .trim()
-        .toLowerCase();
-      d[col] = v;
-    });
+    let stage;
+    if (detLower.includes("indicator") || detLower.includes("stage 1")) {
+      stage = "Stage 1 - Indicator";
+    } else if (detLower.includes("confirm") || detLower.includes("stage 2")) {
+      stage = "Stage 2 - Confirmatory";
+    } else if (
+      detLower.includes("lab") ||
+      detLower.includes("toxicology") ||
+      detLower.includes("stage 3")
+    ) {
+      stage = "Stage 3 - Laboratory";
+    } else {
+      stage = "Other / NA";
+    }
+    d.stage = stage;
   });
 
-  const stateTotals = new Map();
+  const validStages = [
+    "Stage 1 - Indicator",
+    "Stage 2 - Confirmatory",
+    "Stage 3 - Laboratory"
+  ];
+
+  rows = rows.filter(
+    d => d.year >= 2008 && d.year <= 2024 && validStages.includes(d.stage)
+  );
+
+  const years = Array.from(new Set(rows.map(d => d.year))).sort((a, b) => a - b);
+
+  const dataByYear = years.map(year => {
+    const obj = { year };
+    validStages.forEach(stage => {
+      obj[stage] = 0;
+    });
+    return obj;
+  });
+
+  const yearIndex = new Map(years.map((y, i) => [y, i]));
 
   rows.forEach(d => {
-    const stateName = jurisToStateName[d.jurisdiction];
-    if (!stateName) return;
-
-    let entry = stateTotals.get(stateName);
-    if (!entry) {
-      entry = { Amphetamine: 0, Cannabis: 0, Ecstasy: 0 };
-      stateTotals.set(stateName, entry);
-    }
-
-    if (d.AMPHETAMINE === "yes") entry.Amphetamine += d.positive_count;
-    if (d.CANNABIS === "yes")    entry.Cannabis    += d.positive_count;
-    if (d.ECSTASY === "yes")     entry.Ecstasy     += d.positive_count;
+    const idx = yearIndex.get(d.year);
+    if (idx === undefined) return;
+    dataByYear[idx][d.stage] += d.positive_count;
   });
 
-  const topByState = new Map();
-  for (const [stateName, totals] of stateTotals.entries()) {
-    let bestDrug = null;
-    let bestVal = 0;
-    for (const [drug, val] of Object.entries(totals)) {
-      if (val > bestVal) {
-        bestVal = val;
-        bestDrug = drug;
-      }
-    }
-    if (bestDrug) {
-      topByState.set(stateName, { drug: bestDrug, total: bestVal });
-    }
-  }
+  const stack = d3.stack()
+    .keys(validStages)
+    .order(d3.stackOrderNone)
+    .offset(d3.stackOffsetNone);
 
-  const container = d3.select("#chart2");
+  const series = stack(dataByYear);
+
+  const container = d3.select("#chart3");
   container.selectAll("*").remove();
-  const infoBox = d3.select("#chart2-info");
-
-  if (!geo || !geo.features) {
-    container
-      .append("div")
-      .style("padding", "0.75rem")
-      .style("font-size", "0.8rem")
-      .text("GeoJSON has no features — cannot draw map.");
-    return;
-  }
+  const infoBox = d3.select("#chart3-info");
 
   const bounds = container.node().getBoundingClientRect();
   const width = bounds.width || window.innerWidth;
   const height = bounds.height || Math.max(window.innerHeight - 160, 450);
-  const margin = { top: 8, right: 8, bottom: 8, left: 8 };
+  const margin = { top: 25, right: 20, bottom: 60, left: 70 };
 
   const svg = container
     .append("svg")
@@ -119,19 +97,60 @@
     .attr("width", "100%")
     .attr("height", height);
 
-  const projection = d3.geoMercator().fitSize(
-    [width - margin.left - margin.right, height - margin.top - margin.bottom],
-    geo
-  );
-  const path = d3.geoPath().projection(projection);
+  const x = d3.scalePoint()
+    .domain(years)
+    .range([margin.left, width - margin.right])
+    .padding(0.2);
 
-  const g = svg
+  const maxY = d3.max(series, s => d3.max(s, d => d[1])) || 1;
+
+  const y = d3.scaleLinear()
+    .domain([0, maxY])
+    .nice()
+    .range([height - margin.bottom, margin.top]);
+
+  const color = d3.scaleOrdinal()
+    .domain(validStages)
+    .range([
+      "#00176B",
+      "rgba(0, 23, 107, 0.65)",
+      "rgba(0, 23, 107, 0.3)"
+    ]);
+
+  const area = d3.area()
+    .x((d, i) => x(dataByYear[i].year))
+    .y0(d => y(d[0]))
+    .y1(d => y(d[1]))
+    .curve(d3.curveMonotoneX);
+
+  const areaAtBottom = d3.area()
+    .x((d, i) => x(dataByYear[i].year))
+    .y0(() => y(0))
+    .y1(() => y(0))
+    .curve(d3.curveMonotoneX);
+
+  const stageGroup = svg.selectAll("path.stage-area")
+    .data(series)
+    .enter()
     .append("g")
-    .attr("transform", `translate(${margin.left},${margin.top})`);
+    .attr("class", "stage-group");
+
+  stageGroup
+    .append("path")
+    .attr("class", "stage-area")
+    .attr("fill", d => color(d.key))
+    .attr("fill-opacity", 0.55)
+    .attr("stroke", "#ffffff")
+    .attr("stroke-width", 0.7)
+    .attr("d", areaAtBottom)
+    .transition()
+    .duration(900)
+    .delay((_, i) => i * 120)
+    .ease(d3.easeCubicOut)
+    .attr("d", area);
 
   const tooltip = container
     .append("div")
-    .attr("class", "map-tooltip")
     .style("position", "absolute")
     .style("pointer-events", "none")
     .style("background", "rgba(0,0,0,0.9)")
@@ -144,111 +163,153 @@
 
   const containerNode = container.node();
 
-  function showTooltip(event, d) {
-    const [mx, my] = d3.pointer(event, containerNode);
-    const stateName = d.properties.STATE_NAME;
-    const abbrev = stateNameToAbbrev[stateName] || "";
-    const info = topByState.get(stateName);
-
-    let html = "";
-    if (abbrev) {
-      html += `<strong>${abbrev} — ${stateName}</strong><br>`;
-    } else {
-      html += `<strong>${stateName}</strong><br>`;
-    }
-
-    if (info) {
-      html += `${info.drug} (${info.total.toLocaleString()} positives)`;
-    } else {
-      html += "No positives recorded for these drugs";
-    }
-
-    tooltip
-      .style("opacity", 1)
-      .html(html)
-      .style("left", mx + 8 + "px")
-      .style("top", my + 8 + "px");
-  }
-
-  function hideTooltip() {
-    tooltip.style("opacity", 0);
-  }
-
-  function updateInfoBoxFromFeature(d) {
-    const stateName = d.properties.STATE_NAME;
-    const abbrev = stateNameToAbbrev[stateName] || stateName;
-    const info = topByState.get(stateName);
-    if (info) {
-      infoBox.html(
-        `<strong>${abbrev}</strong>: ${info.drug} (${info.total.toLocaleString()} positives)`
-      );
-    } else {
-      infoBox.html(`<strong>${abbrev}</strong>: No positives recorded for these drugs`);
-    }
-  }
-
-  // Draw states with fade-in animation
-  const states = g.selectAll("path.state")
-    .data(geo.features)
-    .enter()
-    .append("path")
-    .attr("class", "state-region")
-    .attr("d", path)
-    .attr("fill", d => {
-      const info = topByState.get(d.properties.STATE_NAME);
-      return info ? drugColorMap[info.drug] : "#f4f4f4";
-    })
-    .attr("stroke", "#e5e7eb")
-    .attr("stroke-width", 1)
-    .attr("opacity", 0)
-    .on("mousemove", showTooltip)
-    .on("mouseenter", function (event, d) {
-      showTooltip(event, d);
-      updateInfoBoxFromFeature(d);
-      d3.select(this)
-        .transition()
-        .duration(200)
-        .attr("stroke", "#111827")
-        .attr("stroke-width", 1.8);
-    })
-    .on("mouseleave", function () {
-      hideTooltip();
-      d3.select(this)
-        .transition()
-        .duration(200)
-        .attr("stroke", "#e5e7eb")
-        .attr("stroke-width", 1);
-    })
-    .on("click", (event, d) => {
-      updateInfoBoxFromFeature(d);
+  function nearestYearIndex(mouseX) {
+    let closest = 0;
+    let minDist = Infinity;
+    years.forEach((year, i) => {
+      const px = x(year);
+      const dist = Math.abs(mouseX - px);
+      if (dist < minDist) {
+        minDist = dist;
+        closest = i;
+      }
     });
+    return closest;
+  }
 
-  states
-    .transition()
-    .duration(750)
-    .delay((_, i) => i * 60)
-    .attr("opacity", 1);
+  function updateInfoForIndex(idx) {
+    const year = dataByYear[idx].year;
+    const parts = validStages.map(stage =>
+      `${stage} = ${dataByYear[idx][stage].toLocaleString()}`
+    );
+    infoBox.html(`<strong>${year}</strong> — ${parts.join("; ")}`);
+  }
+
+  // selection line that tracks the pointer/click
+  const selectionLine = svg.append("line")
+    .attr("class", "selection-line")
+    .attr("stroke", "#0f172a")
+    .attr("stroke-width", 1.2)
+    .attr("stroke-dasharray", "4 3")
+    .style("display", "none");
+
+  // X axis (store references to ticks for selection)
+  const xAxisG = svg.append("g")
+    .attr("transform", `translate(0,${height - margin.bottom})`)
+    .call(
+      d3.axisBottom(x)
+        .tickValues(years.filter((y, i) => i % 2 === 0))
+        .tickFormat(d3.format("d"))
+    );
+
+  const xAxisText = xAxisG.selectAll("text")
+    .style("font-size", "10px")
+    .attr("class", "axis-year");
+
+  // Y axis
+  svg.append("g")
+    .attr("transform", `translate(${margin.left},0)`)
+    .call(d3.axisLeft(y).ticks(6).tickFormat(d3.format(",")))
+    .append("text")
+    .attr("x", -margin.left + 5)
+    .attr("y", margin.top - 10)
+    .attr("fill", "#00176B")
+    .attr("text-anchor", "start")
+    .style("font-size", "11px")
+    .text("Positive tests");
 
   // Legend
-  const legend = svg.append("g")
-    .attr("transform", `translate(${width - 170}, ${margin.top + 10})`);
+  const legend = svg
+    .append("g")
+    .attr("transform", `translate(${width - 220}, ${margin.top})`);
 
-  ["Amphetamine", "Cannabis", "Ecstasy"].forEach((drug, i) => {
-    const row = legend.append("g").attr("transform", `translate(0, ${i * 22})`);
-    row.append("rect")
-      .attr("width", 14)
-      .attr("height", 14)
-      .attr("rx", 3)
-      .attr("fill", drugColorMap[drug]);
-    row.append("text")
-      .attr("x", 20)
-      .attr("y", 11)
-      .style("font-size", "12px")
+  validStages.forEach((stage, i) => {
+    const gRow = legend
+      .append("g")
+      .attr("transform", `translate(0, ${i * 26})`);
+
+    gRow.append("rect")
+      .attr("x", 0)
+      .attr("y", -12)
+      .attr("width", 16)
+      .attr("height", 16)
+      .attr("fill", color(stage));
+
+    gRow.append("text")
+      .attr("x", 24)
+      .attr("y", 0)
+      .text(stage)
+      .style("font-size", "13px")
       .style("font-weight", "600")
-      .text(drug);
+      .attr("alignment-baseline", "middle");
   });
 
-  // Seed info with NSW (or first available)
-  const initialFeature = geo.features.find(f => f.properties.STATE_NAME === "New South Wales") || geo.features[0];
-  if (initialFeature) updateInfoBoxFromFeature(initialFeature);
+  // Hover / click capture
+  svg.append("rect")
+    .attr("class", "hover-capture")
+    .attr("x", margin.left)
+    .attr("y", margin.top)
+    .attr("width", width - margin.left - margin.right)
+    .attr("height", height - margin.top - margin.bottom)
+    .attr("fill", "transparent")
+    .on("mousemove", function (event) {
+      const [mx, my] = d3.pointer(event, containerNode);
+      const idx = nearestYearIndex(mx);
+      const year = dataByYear[idx].year;
+
+      let html = `<strong>${year}</strong><br>`;
+      validStages.forEach(stage => {
+        const val = dataByYear[idx][stage] || 0;
+        html += `${stage}: ${val.toLocaleString()}<br>`;
+      });
+
+      tooltip
+        .style("opacity", 1)
+        .html(html)
+        .style("left", mx + 8 + "px")
+        .style("top", my + 8 + "px");
+
+      updateInfoForIndex(idx);
+
+      xAxisText.classed("selected", function (d) {
+        return d === year;
+      });
+
+      const xPos = x(year);
+      selectionLine
+        .style("display", null)
+        .attr("x1", xPos)
+        .attr("x2", xPos)
+        .attr("y1", margin.top)
+        .attr("y2", height - margin.bottom);
+    })
+    .on("mouseleave", () => {
+      tooltip.style("opacity", 0);
+      selectionLine.style("display", "none");
+      xAxisText.classed("selected", false);
+    })
+    .on("click", (event) => {
+      const [mx] = d3.pointer(event, containerNode);
+      const idx = nearestYearIndex(mx);
+      const year = dataByYear[idx].year;
+
+      updateInfoForIndex(idx);
+
+      xAxisText.classed("selected", function (d) {
+        return d === year;
+      });
+
+      const xPos = x(year);
+      selectionLine
+        .style("display", null)
+        .attr("x1", xPos)
+        .attr("x2", xPos)
+        .attr("y1", margin.top)
+        .attr("y2", height - margin.bottom);
+    });
+
+  // Seed info panel with the latest year
+  if (dataByYear.length) {
+    updateInfoForIndex(dataByYear.length - 1);
+  }
 })();

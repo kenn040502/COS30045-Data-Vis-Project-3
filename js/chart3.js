@@ -1,23 +1,23 @@
-// js/chart3.js
-// Chart 3 - Stacked area chart of detection methods over time (2008-2024)
+// js/chart1.js
+// Chart 1 - Pareto chart of total positive counts by jurisdiction (2008-2024)
 
 (async function () {
   let rows;
   try {
     rows = await d3.csv("data/cleanedData.csv");
   } catch (err) {
-    console.error("chart3 - CSV load error:", err);
-    d3.select("#chart3")
+    console.error("chart1 - CSV load error:", err);
+    d3.select("#chart1")
       .append("div")
       .style("padding", "0.75rem")
       .style("font-size", "0.8rem")
-      .text("Could not load cleanedData.csv for detection chart.");
+      .text("Could not load cleanedData.csv for jurisdiction chart.");
     return;
   }
 
-  // Parse and categorise detection stages
   rows.forEach(d => {
     d.year = +(d.YEAR || d.year || 0);
+    d.jurisdiction = (d.JURISDICTION || d.jurisdiction || "").trim();
     d.positive_count = +(
       d.COUNT ||
       d.count ||
@@ -25,70 +25,62 @@
       d.positive_count ||
       0
     );
-    const rawDet =
-      (d.DETECTION_METHOD || d.DETECTION || d.detection || "").toString();
-    const detLower = rawDet.toLowerCase();
-
-    let stage;
-    if (detLower.includes("indicator") || detLower.includes("stage 1")) {
-      stage = "Stage 1 - Indicator";
-    } else if (detLower.includes("confirm") || detLower.includes("stage 2")) {
-      stage = "Stage 2 - Confirmatory";
-    } else if (
-      detLower.includes("lab") ||
-      detLower.includes("toxicology") ||
-      detLower.includes("stage 3")
-    ) {
-      stage = "Stage 3 - Laboratory";
-    } else {
-      stage = "Other / NA";
-    }
-    d.stage = stage;
   });
 
-  const validStages = [
-    "Stage 1 - Indicator",
-    "Stage 2 - Confirmatory",
-    "Stage 3 - Laboratory"
-  ];
+  rows = rows.filter(d => d.year >= 2008 && d.year <= 2024 && d.jurisdiction);
 
-  rows = rows.filter(
-    d => d.year >= 2008 && d.year <= 2024 && validStages.includes(d.stage)
-  );
+  const jurisToStateName = {
+    NSW: "New South Wales",
+    VIC: "Victoria",
+    QLD: "Queensland",
+    SA:  "South Australia",
+    WA:  "Western Australia",
+    TAS: "Tasmania",
+    NT:  "Northern Territory",
+    ACT: "Australian Capital Territory"
+  };
 
-  const years = Array.from(new Set(rows.map(d => d.year))).sort((a, b) => a - b);
+  const agg = d3.rollups(
+    rows,
+    v => d3.sum(v, d => d.positive_count),
+    d => d.jurisdiction
+  )
+    .map(([jur, total]) => ({
+      jurisdiction: jur,
+      total,
+      name: jurisToStateName[jur] || jur
+    }))
+    .filter(d => d.total > 0);
 
-  const dataByYear = years.map(year => {
-    const obj = { year };
-    validStages.forEach(stage => {
-      obj[stage] = 0;
-    });
-    return obj;
+  agg.sort((a, b) => d3.descending(a.total, b.total));
+
+  const grandTotal = d3.sum(agg, d => d.total) || 1;
+  let running = 0;
+  agg.forEach(d => {
+    running += d.total;
+    d.cumPct = (running / grandTotal) * 100;
   });
 
-  const yearIndex = new Map(years.map((y, i) => [y, i]));
-
-  rows.forEach(d => {
-    const idx = yearIndex.get(d.year);
-    if (idx === undefined) return;
-    dataByYear[idx][d.stage] += d.positive_count;
-  });
-
-  const stack = d3.stack()
-    .keys(validStages)
-    .order(d3.stackOrderNone)
-    .offset(d3.stackOffsetNone);
-
-  const series = stack(dataByYear);
-
-  const container = d3.select("#chart3");
+  const container = d3.select("#chart1");
   container.selectAll("*").remove();
-  const infoBox = d3.select("#chart3-info");
+  const infoBox = d3.select("#chart1-info");
+
+  const tooltip = container
+    .append("div")
+    .style("position", "absolute")
+    .style("background", "rgba(0,0,0,0.85)")
+    .style("color", "#fff")
+    .style("padding", "6px 10px")
+    .style("border-radius", "6px")
+    .style("font-size", "0.8rem")
+    .style("pointer-events", "none")
+    .style("box-shadow", "0 8px 16px rgba(0,0,0,0.25)")
+    .style("opacity", 0);
 
   const bounds = container.node().getBoundingClientRect();
   const width = bounds.width || window.innerWidth;
-  const height = bounds.height || Math.max(window.innerHeight - 160, 450);
-  const margin = { top: 25, right: 20, bottom: 60, left: 70 };
+  const height = bounds.height || Math.max(window.innerHeight - 160, 420);
+  const margin = { top: 20, right: 50, bottom: 70, left: 75 };
 
   const svg = container
     .append("svg")
@@ -97,219 +89,173 @@
     .attr("width", "100%")
     .attr("height", height);
 
-  const x = d3.scalePoint()
-    .domain(years)
+  const x = d3.scaleBand()
+    .domain(agg.map(d => d.jurisdiction))
     .range([margin.left, width - margin.right])
-    .padding(0.2);
+    .padding(0.3);
 
-  const maxY = d3.max(series, s => d3.max(s, d => d[1])) || 1;
-
-  const y = d3.scaleLinear()
-    .domain([0, maxY])
+  const yLeft = d3.scaleLinear()
+    .domain([0, d3.max(agg, d => d.total) || 1])
     .nice()
     .range([height - margin.bottom, margin.top]);
 
-  const color = d3.scaleOrdinal()
-    .domain(validStages)
-    .range([
-      "#00176B",
-      "rgba(0, 23, 107, 0.65)",
-      "rgba(0, 23, 107, 0.3)"
-    ]);
+  const yRight = d3.scaleLinear()
+    .domain([0, 100])
+    .range([height - margin.bottom, margin.top]);
 
-  const area = d3.area()
-    .x((d, i) => x(dataByYear[i].year))
-    .y0(d => y(d[0]))
-    .y1(d => y(d[1]))
-    .curve(d3.curveMonotoneX);
+  function updateInfo(jur) {
+    const selected = agg.find(d => d.jurisdiction === jur);
+    if (selected) {
+      infoBox.html(
+        `<strong>${selected.jurisdiction} - ${selected.name}</strong>: ` +
+        `${selected.total.toLocaleString()} positives ` +
+        `(${selected.cumPct.toFixed(1)}% cumulative)`
+      );
+    }
+  }
 
-  const areaAtBottom = d3.area()
-    .x((d, i) => x(dataByYear[i].year))
-    .y0(() => y(0))
-    .y1(() => y(0))
-    .curve(d3.curveMonotoneX);
-
-  const stageGroup = svg.selectAll("path.stage-area")
-    .data(series)
+  // Bars with grow-in animation
+  const bars = svg.selectAll("rect.bar")
+    .data(agg)
     .enter()
-    .append("g")
-    .attr("class", "stage-group");
+    .append("rect")
+    .attr("class", "bar")
+    .attr("x", d => x(d.jurisdiction))
+    .attr("y", yLeft(0))
+    .attr("width", x.bandwidth())
+    .attr("height", 0)
+    .attr("fill", "#00176B")
+    .attr("opacity", 0.9)
+    .on("mouseenter", (event, d) => {
+      svg.selectAll("rect.bar").attr("opacity", b => b.jurisdiction === d.jurisdiction ? 1 : 0.35);
+      svg.selectAll("circle.pareto-point").attr("opacity", b => b.jurisdiction === d.jurisdiction ? 1 : 0.4);
+      tooltip
+        .style("opacity", 1)
+        .html(
+          `<strong>${d.jurisdiction} - ${d.name}</strong><br>` +
+          `Total positives: ${d.total.toLocaleString()}<br>` +
+          `Cumulative: ${d.cumPct.toFixed(1)}%`
+        )
+        .style("left", (x(d.jurisdiction) + x.bandwidth() / 2) + "px")
+        .style("top", yLeft(d.total) - 12 + "px");
+      updateInfo(d.jurisdiction);
+    })
+    .on("mouseleave", () => {
+      svg.selectAll("rect.bar").attr("opacity", 0.9);
+      svg.selectAll("circle.pareto-point").attr("opacity", 1);
+      tooltip.style("opacity", 0);
+    })
+    .on("click", (event, d) => updateInfo(d.jurisdiction));
 
-  stageGroup
-    .append("path")
-    .attr("class", "stage-area")
-    .attr("fill", d => color(d.key))
-    .attr("fill-opacity", 0.55)
-    .attr("stroke", "#ffffff")
-    .attr("stroke-width", 0.7)
-    .attr("d", areaAtBottom)
+  bars.transition()
+    .duration(800)
+    .delay((_, i) => i * 60)
+    .ease(d3.easeCubicOut)
+    .attr("y", d => yLeft(d.total))
+    .attr("height", d => height - margin.bottom - yLeft(d.total));
+
+  // Pareto line with stroke-draw animation
+  const line = d3.line()
+    .x(d => x(d.jurisdiction) + x.bandwidth() / 2)
+    .y(d => yRight(d.cumPct))
+    .curve(d3.curveMonotoneX);
+
+  const paretoPath = svg.append("path")
+    .datum(agg)
+    .attr("fill", "none")
+    .attr("stroke", "#f97316")
+    .attr("stroke-width", 2)
+    .attr("d", line);
+
+  const totalLen = paretoPath.node().getTotalLength();
+  paretoPath
+    .attr("stroke-dasharray", `${totalLen} ${totalLen}`)
+    .attr("stroke-dashoffset", totalLen)
     .transition()
     .duration(900)
-    .delay((_, i) => i * 120)
+    .delay(200)
     .ease(d3.easeCubicOut)
-    .attr("d", area);
+    .attr("stroke-dashoffset", 0);
 
-  const tooltip = container
-    .append("div")
-    .style("position", "absolute")
-    .style("pointer-events", "none")
-    .style("background", "rgba(0,0,0,0.9)")
-    .style("color", "#fff")
-    .style("padding", "6px 10px")
-    .style("border-radius", "6px")
-    .style("font-size", "0.75rem")
-    .style("box-shadow", "0 8px 16px rgba(0,0,0,0.35)")
-    .style("opacity", 0);
+  const paretoPoints = svg.selectAll("circle.pareto-point")
+    .data(agg)
+    .enter()
+    .append("circle")
+    .attr("class", "pareto-point")
+    .attr("cx", d => x(d.jurisdiction) + x.bandwidth() / 2)
+    .attr("cy", d => yRight(d.cumPct))
+    .attr("r", 0)
+    .attr("fill", "#f97316")
+    .on("mouseenter", (event, d) => {
+      tooltip
+        .style("opacity", 1)
+        .html(
+          `<strong>${d.jurisdiction} - ${d.name}</strong><br>` +
+          `Cumulative: ${d.cumPct.toFixed(1)}%`
+        )
+        .style("left", (x(d.jurisdiction) + x.bandwidth() / 2) + "px")
+        .style("top", yRight(d.cumPct) - 14 + "px");
+      updateInfo(d.jurisdiction);
+    })
+    .on("mouseleave", () => tooltip.style("opacity", 0))
+    .on("click", (event, d) => updateInfo(d.jurisdiction));
 
-  const containerNode = container.node();
+  paretoPoints
+    .transition()
+    .duration(600)
+    .delay((_, i) => 250 + i * 60)
+    .ease(d3.easeBackOut)
+    .attr("r", 3);
 
-  function nearestYearIndex(mouseX) {
-    let closest = 0;
-    let minDist = Infinity;
-    years.forEach((year, i) => {
-      const px = x(year);
-      const dist = Math.abs(mouseX - px);
-      if (dist < minDist) {
-        minDist = dist;
-        closest = i;
-      }
-    });
-    return closest;
-  }
-
-  function updateInfoForIndex(idx) {
-    const year = dataByYear[idx].year;
-    const parts = validStages.map(stage =>
-      `${stage} = ${dataByYear[idx][stage].toLocaleString()}`
-    );
-    infoBox.html(`<strong>${year}</strong> — ${parts.join("; ")}`);
-  }
-
-  // selection line that tracks the pointer/click
-  const selectionLine = svg.append("line")
-    .attr("class", "selection-line")
-    .attr("stroke", "#0f172a")
-    .attr("stroke-width", 1.2)
-    .attr("stroke-dasharray", "4 3")
-    .style("display", "none");
-
-  // X axis (store references to ticks for selection)
-  const xAxisG = svg.append("g")
+  // Axes
+  svg.append("g")
     .attr("transform", `translate(0,${height - margin.bottom})`)
-    .call(
-      d3.axisBottom(x)
-        .tickValues(years.filter((y, i) => i % 2 === 0))
-        .tickFormat(d3.format("d"))
-    );
+    .call(d3.axisBottom(x))
+    .selectAll("text")
+    .attr("transform", "rotate(-20)")
+    .style("text-anchor", "end")
+    .style("font-size", "10px");
 
-  const xAxisText = xAxisG.selectAll("text")
-    .style("font-size", "10px")
-    .attr("class", "axis-year");
-
-  // Y axis
   svg.append("g")
     .attr("transform", `translate(${margin.left},0)`)
-    .call(d3.axisLeft(y).ticks(6).tickFormat(d3.format(",")))
+    .call(d3.axisLeft(yLeft).ticks(6).tickFormat(d3.format(",")))
     .append("text")
     .attr("x", -margin.left + 5)
     .attr("y", margin.top - 10)
     .attr("fill", "#00176B")
     .attr("text-anchor", "start")
     .style("font-size", "11px")
-    .text("Positive tests");
+    .text("Total positives");
 
-  // Legend
-  const legend = svg
-    .append("g")
-    .attr("transform", `translate(${width - 220}, ${margin.top})`);
+  svg.append("g")
+    .attr("transform", `translate(${width - margin.right},0)`)
+    .call(d3.axisRight(yRight).ticks(5).tickFormat(d => d + "%"))
+    .append("text")
+    .attr("x", 35)
+    .attr("y", margin.top - 10)
+    .attr("fill", "#00176B")
+    .attr("text-anchor", "end")
+    .style("font-size", "11px")
+    .text("Cumulative %");
 
-  validStages.forEach((stage, i) => {
-    const gRow = legend
-      .append("g")
-      .attr("transform", `translate(0, ${i * 26})`);
+  svg.append("line")
+    .attr("x1", margin.left)
+    .attr("x2", width - margin.right)
+    .attr("y1", yRight(80))
+    .attr("y2", yRight(80))
+    .attr("stroke", "rgba(0, 23, 107, 0.3)")
+    .attr("stroke-dasharray", "4 4");
 
-    gRow.append("rect")
-      .attr("x", 0)
-      .attr("y", -12)
-      .attr("width", 16)
-      .attr("height", 16)
-      .attr("fill", color(stage));
+  svg.append("text")
+    .attr("x", width - margin.right - 4)
+    .attr("y", yRight(80) - 4)
+    .attr("text-anchor", "end")
+    .style("font-size", "10px")
+    .style("fill", "rgba(0, 23, 107, 0.6)")
+    .text("80% cumulative");
 
-    gRow.append("text")
-      .attr("x", 24)
-      .attr("y", 0)
-      .text(stage)
-      .style("font-size", "13px")
-      .style("font-weight", "600")
-      .attr("alignment-baseline", "middle");
-  });
-
-  // Hover / click capture
-  svg.append("rect")
-    .attr("class", "hover-capture")
-    .attr("x", margin.left)
-    .attr("y", margin.top)
-    .attr("width", width - margin.left - margin.right)
-    .attr("height", height - margin.top - margin.bottom)
-    .attr("fill", "transparent")
-    .on("mousemove", function (event) {
-      const [mx, my] = d3.pointer(event, containerNode);
-      const idx = nearestYearIndex(mx);
-      const year = dataByYear[idx].year;
-
-      let html = `<strong>${year}</strong><br>`;
-      validStages.forEach(stage => {
-        const val = dataByYear[idx][stage] || 0;
-        html += `${stage}: ${val.toLocaleString()}<br>`;
-      });
-
-      tooltip
-        .style("opacity", 1)
-        .html(html)
-        .style("left", mx + 8 + "px")
-        .style("top", my + 8 + "px");
-
-      updateInfoForIndex(idx);
-
-      xAxisText.classed("selected", function (d) {
-        return d === year;
-      });
-
-      const xPos = x(year);
-      selectionLine
-        .style("display", null)
-        .attr("x1", xPos)
-        .attr("x2", xPos)
-        .attr("y1", margin.top)
-        .attr("y2", height - margin.bottom);
-    })
-    .on("mouseleave", () => {
-      tooltip.style("opacity", 0);
-      selectionLine.style("display", "none");
-      xAxisText.classed("selected", false);
-    })
-    .on("click", (event) => {
-      const [mx] = d3.pointer(event, containerNode);
-      const idx = nearestYearIndex(mx);
-      const year = dataByYear[idx].year;
-
-      updateInfoForIndex(idx);
-
-      xAxisText.classed("selected", function (d) {
-        return d === year;
-      });
-
-      const xPos = x(year);
-      selectionLine
-        .style("display", null)
-        .attr("x1", xPos)
-        .attr("x2", xPos)
-        .attr("y1", margin.top)
-        .attr("y2", height - margin.bottom);
-    });
-
-  // Seed info panel with the latest year
-  if (dataByYear.length) {
-    updateInfoForIndex(dataByYear.length - 1);
+  // Seed the info panel with the top jurisdiction
+  if (agg.length) {
+    updateInfo(agg[0].jurisdiction);
   }
 })();

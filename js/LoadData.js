@@ -2,7 +2,7 @@
 // Load Chart1Data.csv  (Age groups)
 // ===========================
 if (typeof drawChart1 === "function") {
-    d3.csv("data/Chart1Data.csv", d => ({
+    d3.csv("data/Chart5Data.csv", d => ({
         AGE_GROUP: d["AGE_GROUP"],
         2023: +d["2023"],
         2024: +d["2024"]
@@ -73,7 +73,7 @@ if (typeof drawChart2 === "function") {
 // ===========================
 if (typeof drawChart4 === "function") {
     Promise.all([
-        d3.csv("data/Chart4Data.csv", d => ({
+        d3.csv("data/Chart1Data.csv", d => ({
             JURISDICTION: d["JURISDICTION"].trim().toLowerCase(),
             totalPositive: +d["Total Positive Tests"],
 

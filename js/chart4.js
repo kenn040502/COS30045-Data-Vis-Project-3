@@ -315,14 +315,6 @@ function createLocationMap(allData, geoData, containerSelector) {
         .style("pointer-events", "none")
         .text(d => d.properties.STATE_NAME);
 
-    // Title removed — global shared title is now used
-    const title = svg.append("text")
-        .attr("x", width / 2)
-        .attr("y", 20)
-        .attr("text-anchor", "middle")
-        .style("font-size", "15px")
-        .style("font-weight", "bold");
-
     // Map config
     const stateConfig = {
         "new south wales": { totalKey: "nswTotal", posKey: "nswPos" },
@@ -378,13 +370,6 @@ function createLocationMap(allData, geoData, containerSelector) {
                 const v = totals.get(name) || 0;
                 return v > 0 ? 1 : 0.4;
             });
-
-        // Title
-        title.text(
-            isOverview
-                ? "Jurisdiction contribution — Overview"
-                : `Jurisdiction contribution — ${location}`
-        );
 
         // Tooltip
         states
