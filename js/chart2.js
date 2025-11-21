@@ -1,13 +1,17 @@
-// js/chart3.js
-// Chart 3 - Stacked area chart of detection methods over time (2008-2024)
+// js/chart2.js
+// Chart 2 - Layered area chart of detection methods over time (2008-2024)
 
 (async function () {
+  const container = d3.select("#chart2");
+  if (container.empty()) return;
+  const infoBox = d3.select("#chart2-info");
+
   let rows;
   try {
     rows = await d3.csv("data/cleanedData.csv");
   } catch (err) {
-    console.error("chart3 - CSV load error:", err);
-    d3.select("#chart3")
+    console.error("chart2 - CSV load error:", err);
+    container
       .append("div")
       .style("padding", "0.75rem")
       .style("font-size", "0.8rem")
@@ -52,6 +56,13 @@
     "Stage 3 - Laboratory"
   ];
 
+  // Base opacities to keep upper layers visible by default
+  const stageOpacity = {
+    "Stage 1 - Indicator": 0.35,
+    "Stage 2 - Confirmatory": 0.72,
+    "Stage 3 - Laboratory": 0.55
+  };
+
   rows = rows.filter(
     d => d.year >= 2008 && d.year <= 2024 && validStages.includes(d.stage)
   );
@@ -59,6 +70,7 @@
   const minYear = 2008;
   const maxYear = 2024;
   const years = d3.range(minYear, maxYear + 1);
+  const yearIndex = new Map(years.map((y, i) => [y, i]));
 
   const dataByYear = years.map(year => {
     const obj = { year };
@@ -68,24 +80,19 @@
     return obj;
   });
 
-  const yearIndex = new Map(years.map((y, i) => [y, i]));
-
   rows.forEach(d => {
     const idx = yearIndex.get(d.year);
     if (idx === undefined) return;
     dataByYear[idx][d.stage] += d.positive_count;
   });
 
-  const stack = d3.stack()
-    .keys(validStages)
-    .order(d3.stackOrderNone)
-    .offset(d3.stackOffsetNone);
+  // Build individual series for each stage (not stacked)
+  const stageSeries = validStages.map(stage => ({
+    stage,
+    values: dataByYear.map(d => ({ year: d.year, value: d[stage] || 0 }))
+  }));
 
-  const series = stack(dataByYear);
-
-  const container = d3.select("#chart3");
   container.selectAll("*").remove();
-  const infoBox = d3.select("#chart3-info");
 
   const bounds = container.node().getBoundingClientRect();
   const width = bounds.width || window.innerWidth;
@@ -104,7 +111,7 @@
     .range([margin.left, width - margin.right])
     .padding(0.2);
 
-  const maxY = d3.max(series, s => d3.max(s, d => d[1])) || 1;
+  const maxY = d3.max(stageSeries, s => d3.max(s.values, v => v.value)) || 1;
 
   const y = d3.scaleLinear()
     .domain([0, maxY])
@@ -114,44 +121,53 @@
   const color = d3.scaleOrdinal()
     .domain(validStages)
     .range([
-      "#00176B",
-      "rgba(0, 23, 107, 0.65)",
-      "rgba(0, 23, 107, 0.3)"
+      "#001f4d",  // Stage 1 - navy
+      "#1F7A8C",  // Stage 2 - teal
+      "#F4A261"   // Stage 3 - amber
     ]);
 
   const area = d3.area()
-    .x((d, i) => x(dataByYear[i].year))
-    .y0(d => y(d[0]))
-    .y1(d => y(d[1]))
+    .x(d => x(d.year))
+    .y0(() => y(0))
+    .y1(d => y(d.value))
     .curve(d3.curveMonotoneX);
 
-  const areaAtBottom = d3.area()
-    .x((d, i) => x(dataByYear[i].year))
+  const areaZero = d3.area()
+    .x(d => x(d.year))
     .y0(() => y(0))
     .y1(() => y(0))
     .curve(d3.curveMonotoneX);
 
-  const stageGroup = svg.selectAll("path.stage-area")
-    .data(series)
-    .enter()
-    .append("g")
+  const stageGroup = svg.append("g")
     .attr("class", "stage-group");
 
-  const stagePaths = stageGroup
+  // Draw order: Stage 1 (back), Stage 3 (middle), Stage 2 (front)
+  const renderOrder = [
+    "Stage 1 - Indicator",
+    "Stage 3 - Laboratory",
+    "Stage 2 - Confirmatory"
+  ];
+  const renderingSeries = renderOrder
+    .map(stage => stageSeries.find(s => s.stage === stage))
+    .filter(Boolean);
+
+  const stagePaths = stageGroup.selectAll("path.stage-area")
+    .data(renderingSeries)
+    .enter()
     .append("path")
     .attr("class", "stage-area")
-    .attr("fill", d => color(d.key))
-    .attr("fill-opacity", 0.55)
-    .attr("stroke", "#ffffff")
-    .attr("stroke-width", 0.7)
-    .attr("d", areaAtBottom);
+    .attr("fill", d => color(d.stage))
+    .attr("fill-opacity", d => stageOpacity[d.stage] ?? 0.5)
+    .attr("stroke", d => color(d.stage))
+    .attr("stroke-width", 1.4)
+    .attr("d", d => areaZero(d.values));
 
   stagePaths
     .transition()
     .duration(900)
-    .delay((_, i) => i * 120)
+    .delay((_, i) => i * 140)
     .ease(d3.easeCubicOut)
-    .attr("d", area);
+    .attr("d", d => area(d.values));
 
   const tooltip = container
     .append("div")
@@ -186,7 +202,7 @@
     const parts = validStages.map(stage =>
       `${stage} = ${dataByYear[idx][stage].toLocaleString()}`
     );
-    infoBox.html(`<strong>${year}</strong> — ${parts.join("; ")}`);
+    infoBox.html(`<strong>${year}</strong> - ${parts.join("; ")}`);
   }
 
   // selection line that tracks the pointer/click
@@ -257,17 +273,22 @@
   function setActiveStage(stageKey) {
     stagePaths
       .attr("fill-opacity", d => {
-        if (!stageKey) return 0.55;
-        return d.key === stageKey ? 0.9 : 0.15;
+        const base = stageOpacity[d.stage] ?? 0.5;
+        if (!stageKey) return base;
+        return d.stage === stageKey ? Math.min(1, base + 0.25) : base * 0.35;
       })
-      .attr("stroke-width", d => stageKey && d.key === stageKey ? 1.1 : 0.7);
+      .attr("stroke-width", d => stageKey && d.stage === stageKey ? 2 : 1.4);
 
     legendRows.selectAll("rect")
-      .attr("opacity", d => (!stageKey || d === stageKey) ? 1 : 0.35);
+      .attr("opacity", 1);
 
     legendRows.selectAll("text")
       .attr("font-weight", d => d === stageKey ? 700 : 600)
       .attr("fill", d => d === stageKey ? "#00176B" : "#1f2937");
+
+    if (stageKey) {
+      stagePaths.filter(d => d.stage === stageKey).raise();
+    }
   }
 
   // Hover / click capture
@@ -281,14 +302,17 @@
     .on("mousemove", function (event) {
       const [mx, my] = d3.pointer(event, containerNode);
       const idx = nearestYearIndex(mx);
-      const year = dataByYear[idx].year;
+      const year = years[idx];
       const valueAtPointer = y.invert(my);
 
       let activeStage = null;
-      series.forEach(s => {
-        const band = s[idx];
-        if (valueAtPointer >= band[0] && valueAtPointer <= band[1]) {
-          activeStage = s.key;
+      let closestDiff = Infinity;
+      stageSeries.forEach(s => {
+        const val = s.values[idx].value;
+        const diff = Math.abs(val - valueAtPointer);
+        if (diff < closestDiff) {
+          closestDiff = diff;
+          activeStage = s.stage;
         }
       });
 
@@ -329,14 +353,17 @@
     .on("click", (event) => {
       const [mx, my] = d3.pointer(event, containerNode);
       const idx = nearestYearIndex(mx);
-      const year = dataByYear[idx].year;
+      const year = years[idx];
       const valueAtPointer = y.invert(my);
 
       let activeStage = null;
-      series.forEach(s => {
-        const band = s[idx];
-        if (valueAtPointer >= band[0] && valueAtPointer <= band[1]) {
-          activeStage = s.key;
+      let closestDiff = Infinity;
+      stageSeries.forEach(s => {
+        const val = s.values[idx].value;
+        const diff = Math.abs(val - valueAtPointer);
+        if (diff < closestDiff) {
+          closestDiff = diff;
+          activeStage = s.stage;
         }
       });
 
