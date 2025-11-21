@@ -56,7 +56,9 @@
     d => d.year >= 2008 && d.year <= 2024 && validStages.includes(d.stage)
   );
 
-  const years = Array.from(new Set(rows.map(d => d.year))).sort((a, b) => a - b);
+  const minYear = 2008;
+  const maxYear = 2024;
+  const years = d3.range(minYear, maxYear + 1);
 
   const dataByYear = years.map(year => {
     const obj = { year };
@@ -135,7 +137,7 @@
     .append("g")
     .attr("class", "stage-group");
 
-  stageGroup
+  const stagePaths = stageGroup
     .append("path")
     .attr("class", "stage-area")
     .attr("fill", d => color(d.key))
@@ -223,26 +225,42 @@
     .append("g")
     .attr("transform", `translate(${width - 220}, ${margin.top})`);
 
-  validStages.forEach((stage, i) => {
-    const gRow = legend
-      .append("g")
-      .attr("transform", `translate(0, ${i * 26})`);
+  const legendRows = legend.selectAll("g.legend-row")
+    .data(validStages)
+    .enter()
+    .append("g")
+    .attr("class", "legend-row")
+    .attr("transform", (_, i) => `translate(0, ${i * 26})`);
 
-    gRow.append("rect")
-      .attr("x", 0)
-      .attr("y", -12)
-      .attr("width", 16)
-      .attr("height", 16)
-      .attr("fill", color(stage));
+  legendRows.append("rect")
+    .attr("x", 0)
+    .attr("y", -12)
+    .attr("width", 16)
+    .attr("height", 16)
+    .attr("fill", d => color(d));
 
-    gRow.append("text")
-      .attr("x", 24)
-      .attr("y", 0)
-      .text(stage)
-      .style("font-size", "13px")
-      .style("font-weight", "600")
-      .attr("alignment-baseline", "middle");
-  });
+  legendRows.append("text")
+    .attr("x", 24)
+    .attr("y", 0)
+    .text(d => d)
+    .style("font-size", "13px")
+    .style("font-weight", "600")
+    .attr("alignment-baseline", "middle")
+    .attr("fill", "#1f2937");
+
+  function setActiveStage(stageKey) {
+    stagePaths.attr("fill-opacity", d => {
+      if (!stageKey) return 0.55;
+      return d.key === stageKey ? 0.8 : 0.15;
+    });
+
+    legendRows.selectAll("rect")
+      .attr("opacity", d => (!stageKey || d === stageKey) ? 1 : 0.35);
+
+    legendRows.selectAll("text")
+      .attr("font-weight", d => d === stageKey ? 700 : 600)
+      .attr("fill", d => d === stageKey ? "#00176B" : "#1f2937");
+  }
 
   // Hover / click capture
   svg.append("rect")
@@ -256,6 +274,15 @@
       const [mx, my] = d3.pointer(event, containerNode);
       const idx = nearestYearIndex(mx);
       const year = dataByYear[idx].year;
+      const valueAtPointer = y.invert(my);
+
+      let activeStage = null;
+      series.forEach(s => {
+        const band = s[idx];
+        if (valueAtPointer >= band[0] && valueAtPointer <= band[1]) {
+          activeStage = s.key;
+        }
+      });
 
       let html = `<strong>${year}</strong><br>`;
       validStages.forEach(stage => {
@@ -282,16 +309,28 @@
         .attr("x2", xPos)
         .attr("y1", margin.top)
         .attr("y2", height - margin.bottom);
+
+      setActiveStage(activeStage);
     })
     .on("mouseleave", () => {
       tooltip.style("opacity", 0);
       selectionLine.style("display", "none");
       xAxisText.classed("selected", false);
+      setActiveStage(null);
     })
     .on("click", (event) => {
-      const [mx] = d3.pointer(event, containerNode);
+      const [mx, my] = d3.pointer(event, containerNode);
       const idx = nearestYearIndex(mx);
       const year = dataByYear[idx].year;
+      const valueAtPointer = y.invert(my);
+
+      let activeStage = null;
+      series.forEach(s => {
+        const band = s[idx];
+        if (valueAtPointer >= band[0] && valueAtPointer <= band[1]) {
+          activeStage = s.key;
+        }
+      });
 
       updateInfoForIndex(idx);
 
@@ -306,6 +345,8 @@
         .attr("x2", xPos)
         .attr("y1", margin.top)
         .attr("y2", height - margin.bottom);
+
+      setActiveStage(activeStage);
     });
 
   // Seed info panel with the latest year

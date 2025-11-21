@@ -32,7 +32,8 @@ function drawChart4(data, geoData) {
   const projection = d3.geoMercator()
     .center([134, -28])
     .scale(800)
-    .translate([width / 2, height / 2]);
+    // Nudge map upward to reduce excess whitespace below
+    .translate([width / 2, height / 2 - 60]);
 
   const path = d3.geoPath().projection(projection);
 
