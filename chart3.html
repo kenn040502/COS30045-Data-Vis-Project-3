@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Positive tests by jurisdiction — Visualisation Q3</title>
+    <title>Drug types by jurisdiction — Visualisation Q4</title>
     <link rel="stylesheet" href="css/style.css" />
     <script src="https://d3js.org/d3.v7.min.js"></script>
   </head>
@@ -13,8 +13,8 @@
         <img src="image/home.svg" alt="Home" class="home-icon" />
       </a>
       <div class="brand-block">
-        <h1 class="brand-title">Positive tests by jurisdiction</h1>
-        <p class="brand-sub">Totals (2008–2024)</p>
+        <h1 class="brand-title">Drug types by jurisdiction</h1>
+        <p class="brand-sub">Most frequently detected drug per state</p>
       </div>
       <div class="top-right">
         <a href="menu.html" class="btn-secondary">Menu</a>
@@ -23,24 +23,27 @@
 
     <main class="dashboard fullscreen">
       <section class="card">
-        <h2 style="margin:20px; text-align:center; font-size:30px;">Positive Tests by Jurisdiction</h2>
-        <div style="background:#f8faff; border-left:4px solid #00176B; padding:14px 18px; margin:15px 0 18px 0; font-size:18px; line-height:1.2;">
-          <strong style="font-size:18px; color:#00176B;">
-            How to interpret this visualisation:
-          </strong>
+        <h1 style="margin:20px; text-align: center;">Dominant Drug-Positive Roadside Tests by Jurisdiction (2023-2024)</h1>
+        <p style="font-size:18px; color:#333; line-height:1.2; margin:15px 0 20px 0; background:#f9fafc; padding:14px 18px; border-left:4px solid #4e79a7; border-radius:6px;">
+          Explore the interactive map to understand which drug types are most frequently detected 
+          across Australian jurisdictions. Each state is coloured by its dominant positive roadside 
+          drug detection based on aggregated test data. Hover over a state to view detailed 
+          positivity percentages for each drug type.
           <br><br>
-          This Pareto chart ranks jurisdictions by total positive roadside drug tests from 2008 to 2024.
+          Click on any state to reveal a breakdown panel showing the exact proportion of 
+          Amphetamine, Cannabis, Ecstasy, and Methylamphetamine detections within that jurisdiction. 
+          Unselected states will dim automatically, helping you focus attention on the selected region.
           <br><br>
-          - Blue bars show total positives per jurisdiction, sorted highest to lowest and animated on load.<br>
-          - The orange line shows the cumulative share; the 80% guide highlights where most positives concentrate.<br>
-          - Hover or click a bar or orange point to see exact totals and cumulative percentage in the tooltip and info bar beneath the chart.
-        </div>
-        <div id="chart1" class="chart-container"></div>
-        <div id="chart1-info" class="chart-info">Click a bar to see totals.</div>
+          The gradient fill displayed after clicking a state illustrates the relative contribution 
+          of each drug type. This enables easy comparison of drug prevalence patterns across the 
+          country, giving a comprehensive view of drug-related roadside testing outcomes.
+        </p>
+        <div id="chart4" class="responsive-svg-container"></div>
       </section>
     </main>
 
     <script src="js/chart3.js"></script>
+    <script src="js/LoadData.js"></script>
     <button id="prevFloat" aria-label="Previous chart" style="position:fixed;left:8px;top:50%;transform:translateY(-50%);z-index:60;" class="float-nav-btn">
       <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M8 4l8 8-8 8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -53,8 +56,8 @@
     </button>
     <script>
       (function(){
-        const prev = 'chart2.html';
-        const next = 'chart4.html';
+        const prev = 'chart5.html';
+        const next = 'chart2.html';
         const p = document.getElementById('prevFloat');
         const n = document.getElementById('nextFloat');
         if(p) p.addEventListener('click', ()=> location.href = prev);
