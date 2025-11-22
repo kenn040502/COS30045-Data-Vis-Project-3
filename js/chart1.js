@@ -202,7 +202,7 @@ function drawChart4(data, geoData) {
               Amphetamine: ${stats.Amphetamine || 0}%<br>
               Cannabis: ${stats.Cannabis || 0}%<br>
               Ecstasy: ${stats.Ecstasy || 0}%<br>
-              Methylamphetamine: ${stats["Methylamphetamine"] || 0}%
+              Methylamphetamine: ${stats.Methylamphetamine|| 0}%
           `);
       } else {
           tooltip.html(`<strong>${d.properties.STATE_NAME}</strong><br><em>No data</em>`);
