@@ -130,7 +130,7 @@ const drawChart1 = (data) => {
   innerChart.append("g").call(d3.axisLeft(y));
 
   // -----------------------------
-  // 6. Highlight 0–16 (Low Sample)
+  // 6. Highlight 0-16 (Low Sample)
   // -----------------------------
   const lowSampleGroup = "0-16";
   const lowBars = chartData.filter(d => d.ageGroup === lowSampleGroup);
@@ -170,7 +170,7 @@ const drawChart1 = (data) => {
     .attr("text-anchor", "middle")
     .style("font-size", "18px")
     .style("font-weight", "bold")
-    .text("Positive Roadside Drug Detections by Age Group (2023–2024)");
+    .text("Positive Roadside Drug Detections by Age Group (2023-2024)");
 
   // -----------------------------
   // 8. Legend

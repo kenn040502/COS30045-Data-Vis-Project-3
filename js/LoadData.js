@@ -1,5 +1,5 @@
 // ===========================
-// Load Chart1Data.csv  (Age groups)
+// Load Chart5Data.csv (Age groups)
 // ===========================
 if (typeof drawChart1 === "function") {
     d3.csv("data/Chart5Data.csv", d => ({
@@ -8,24 +8,23 @@ if (typeof drawChart1 === "function") {
         2024: +d["2024"]
     }))
     .then(chart1Data => {
-        console.log("Chart1Data loaded:", chart1Data);
+        console.log("Chart5Data loaded:", chart1Data);
         drawChart1(chart1Data);
     })
     .catch(error => {
-        console.error("Error loading Chart1Data:", error);
+        console.error("Error loading Chart5Data:", error);
     });
 } else {
-    console.warn("drawChart1 not found; skipping Chart1Data load.");
+    console.warn("drawChart1 not found; skipping Chart5Data load.");
 }
 
 
 // ===========================
-// Load AGGREGATED DATA + GeoJSON
-// for Chart2 (Radar + Choropleth)
+// Load Chart4Data + GeoJSON for location analysis
 // ===========================
-if (typeof drawChart2 === "function") {
+if (typeof drawChart4 === "function") {
     Promise.all([
-        d3.csv("data/Chart2Data.csv", d => ({
+        d3.csv("data/Chart4Data.csv", d => ({
 
             location: d["LOCATION"],
 
@@ -58,23 +57,23 @@ if (typeof drawChart2 === "function") {
         d3.json("data/australia_states.geojson")
     ])
     .then(([aggData, geoData]) => {
-        console.log("Chart2Data loaded:", aggData.length, "rows");
+        console.log("Chart4Data loaded:", aggData.length, "rows");
         console.log("GeoJSON loaded:", geoData.features.length, "features");
-        drawChart2(aggData, geoData);
+        drawChart4(aggData, geoData);
     })
-    .catch(error => console.error("Error loading Chart2Data:", error));
+    .catch(error => console.error("Error loading Chart4Data:", error));
 } else {
-    console.warn("drawChart2 not found; skipping Chart2Data load.");
+    console.warn("drawChart4 not found; skipping Chart4Data load.");
 }
 
 
 // ===========================
-// Load NEW Chart4 dataset + GeoJSON
+// Load Chart3Data + GeoJSON
 // ===========================
-if (typeof drawChart4 === "function") {
+if (typeof drawChart3 === "function") {
     Promise.all([
-        d3.csv("data/Chart1Data.csv", d => ({
-            JURISDICTION: d["JURISDICTION"].trim().toLowerCase(),
+        d3.csv("data/Chart3Data.csv", d => ({
+            JURISDICTION: (d["JURISDICTION"] || "").trim().toLowerCase(),
             totalPositive: +d["Total Positive Tests"],
 
             ampPct: parseFloat(d["Amphetamine Percentage"]),
@@ -85,12 +84,12 @@ if (typeof drawChart4 === "function") {
 
         d3.json("data/australia_states.geojson")
     ])
-    .then(([chart4Data, geoData]) => {
-        console.log("Chart4Data loaded:", chart4Data.length, "rows");
+    .then(([chart3Data, geoData]) => {
+        console.log("Chart3Data loaded:", chart3Data.length, "rows");
         console.log("GeoJSON loaded:", geoData.features.length, "features");
-        drawChart4(chart4Data, geoData);
+        drawChart3(chart3Data, geoData);
     })
-    .catch(error => console.error("Error loading Chart4Data:", error));
+    .catch(error => console.error("Error loading Chart3Data:", error));
 } else {
-    console.warn("drawChart4 not found; skipping Chart4Data load.");
+    console.warn("drawChart3 not found; skipping Chart3Data load.");
 }

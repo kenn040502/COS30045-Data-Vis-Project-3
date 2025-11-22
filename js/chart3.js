@@ -1,6 +1,6 @@
-function drawChart4(data, geoData) {
+function drawChart3(data, geoData) {
 
-  const container = d3.select("#chart4");
+  const container = d3.select("#chart3");
   container.selectAll("*").remove();
 
   const bounds = container.node().getBoundingClientRect();
@@ -180,7 +180,7 @@ function drawChart4(data, geoData) {
 
     const stats = normalizedStats.get(name);
 
-    // If this is NOT the selected state → highlight border
+    // If this is NOT the selected state -> highlight border
     if (selected !== name) {
       d3.select(this)
         .transition()
@@ -194,7 +194,7 @@ function drawChart4(data, geoData) {
     // =========================================
 
     if (selected === null) {
-      // NOTHING SELECTED → show detailed tooltip
+      // NOTHING SELECTED -> show detailed tooltip
       if (stats && stats.total > 0) {
           tooltip.html(`
               <strong>${d.properties.STATE_NAME}</strong><br>
@@ -208,14 +208,14 @@ function drawChart4(data, geoData) {
           tooltip.html(`<strong>${d.properties.STATE_NAME}</strong><br><em>No data</em>`);
       }
     } else {
-        // ANOTHER STATE IS SELECTED → show only “Click to explore”
+        // ANOTHER STATE IS SELECTED -> show only "Click to explore"
         if (selected !== name) {
             tooltip.html(`
               <strong>${d.properties.STATE_NAME}</strong><br/>
               <em>Click to explore</em>
             `);
         } else {
-            // Hover over the selected state → show NOTHING (panel already visible)
+            // Hover over the selected state -> show NOTHING (panel already visible)
             return;
         }
     }
@@ -335,7 +335,7 @@ function drawChart4(data, geoData) {
       return;
     }
 
-    // NORMAL MODE — apply gradient
+    // NORMAL MODE - apply gradient
     const gradFill = createGradient(name, stats, d);
     d3.select(this).transition().duration(600)
       .attr("fill", gradFill);
@@ -372,7 +372,7 @@ function drawChart4(data, geoData) {
       .style("font-size", "15px")
       .style("font-weight", "bold")
       .style("opacity", 0)
-      .text(`${d.properties.STATE_NAME} — Statistics`)
+      .text(`${d.properties.STATE_NAME} - Statistics`)
       .transition()
       .duration(350)
       .delay(150)
