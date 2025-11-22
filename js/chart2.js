@@ -8,53 +8,46 @@
 
   let rows;
   try {
-    rows = await d3.csv("data/cleanedData.csv");
+    rows = await d3.csv("data/Chart2Data.csv");
   } catch (err) {
     console.error("chart2 - CSV load error:", err);
     container
       .append("div")
       .style("padding", "0.75rem")
       .style("font-size", "0.8rem")
-      .text("Could not load cleanedData.csv for detection chart.");
+      .text("Could not load Chart2Data.csv for detection chart.");
     return;
   }
 
-  // Parse and categorise detection stages
-  rows.forEach(d => {
-    d.year = +(d.YEAR || d.year || 0);
-    d.positive_count = +(
-      d.COUNT ||
-      d.count ||
-      d.POSITIVE_COUNT ||
-      d.positive_count ||
-      0
-    );
-    const rawDet =
-      (d.DETECTION_METHOD || d.DETECTION || d.detection || "").toString();
-    const detLower = rawDet.toLowerCase();
-
-    let stage;
-    if (detLower.includes("indicator") || detLower.includes("stage 1")) {
-      stage = "Stage 1 - Indicator";
-    } else if (detLower.includes("confirm") || detLower.includes("stage 2")) {
-      stage = "Stage 2 - Confirmatory";
-    } else if (
-      detLower.includes("lab") ||
-      detLower.includes("toxicology") ||
-      detLower.includes("stage 3")
-    ) {
-      stage = "Stage 3 - Laboratory";
-    } else {
-      stage = "Other / NA";
-    }
-    d.stage = stage;
-  });
-
-  const validStages = [
-    "Stage 1 - Indicator",
-    "Stage 2 - Confirmatory",
-    "Stage 3 - Laboratory"
+  const stageColumns = [
+    { key: "Indicator (Stage 1)+Sum(Sum(COUNT))", stage: "Stage 1 - Indicator" },
+    { key: "Confirmatory (Stage 2)+Sum(Sum(COUNT))", stage: "Stage 2 - Confirmatory" }, // show even if all zeros
+    { key: "Laboratory or Toxicology (Stage 3)+Sum(Sum(COUNT))", stage: "Stage 3 - Laboratory" }
   ];
+
+  const dataByYear = rows
+    .map(d => {
+      const year = +(d.YEAR || d.Year || d.year || 0);
+      const record = { year };
+      stageColumns.forEach(({ key, stage }) => {
+        record[stage] = +d[key] || 0;
+      });
+      return record;
+    })
+    .filter(d => d.year);
+
+  dataByYear.sort((a, b) => d3.ascending(a.year, b.year));
+
+  const validStages = stageColumns.map(({ stage }) => stage);
+
+  if (!dataByYear.length) {
+    container
+      .append("div")
+      .style("padding", "0.75rem")
+      .style("font-size", "0.8rem")
+      .text("No detection method data available in Chart2Data.csv.");
+    return;
+  }
 
   // Base opacities to keep upper layers visible by default
   const stageOpacity = {
@@ -63,28 +56,8 @@
     "Stage 3 - Laboratory": 0.55
   };
 
-  rows = rows.filter(
-    d => d.year >= 2008 && d.year <= 2024 && validStages.includes(d.stage)
-  );
-
-  const minYear = 2008;
-  const maxYear = 2024;
-  const years = d3.range(minYear, maxYear + 1);
+  const years = dataByYear.map(d => d.year);
   const yearIndex = new Map(years.map((y, i) => [y, i]));
-
-  const dataByYear = years.map(year => {
-    const obj = { year };
-    validStages.forEach(stage => {
-      obj[stage] = 0;
-    });
-    return obj;
-  });
-
-  rows.forEach(d => {
-    const idx = yearIndex.get(d.year);
-    if (idx === undefined) return;
-    dataByYear[idx][d.stage] += d.positive_count;
-  });
 
   // Build individual series for each stage (not stacked)
   const stageSeries = validStages.map(stage => ({

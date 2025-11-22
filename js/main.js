@@ -13,7 +13,7 @@
     return;
   }
 
-  // 1b. LOAD GEOJSON (optional – map will show message if missing)
+  // 1b. LOAD GEOJSON (optional - map will show message if missing)
   let aus = null;
   try {
     aus = await d3.json("australia_states.geojson");
@@ -30,7 +30,7 @@
       d.jurisdiction || d.JURISDICTION || d.state || d.State || "";
     d.location = d.location || d.LOCATION || "";
     d.age_group = d.age_group || d.AGE_GROUP || "";
-    // your screenshot shows "DETECTION" – handle both
+    // your screenshot shows "DETECTION" - handle both
     d.detection_method =
       d.detection_method ||
       d.DETECTION_METHOD ||
@@ -61,7 +61,7 @@
   const allDrugColumns = ["AMPHETAMINE", "CANNABIS", "ECSTASY"];
   const drugs = allDrugColumns.slice(); // same labels as columns
 
-  // Colour for “winning” drug on map
+  // Colour for "winning" drug on map
   const drugColorMap = {
     Amphetamine: "#f97316", // orange
     Cannabis: "#22c55e",    // green
@@ -85,7 +85,7 @@
   years.forEach(y => {
     yearPills
       .append("button")
-      .attr("class", `pill ${state.years.has(y) ? "active" : ""}`)
+      .attr("class", `pill ${state.years.has(y) " "active" : ""}`)
       .attr("data-year", y)
       .text(y);
   });
@@ -456,7 +456,7 @@
           d.properties.STATE_CODE ||
           d.properties.jurisdiction;
         const value = totals.get(code) || 0;
-        return value > 0 ? color(value) : "#eeeeee";
+        return value > 0 " color(value) : "#eeeeee";
       })
       .append("title")
       .text(d => {

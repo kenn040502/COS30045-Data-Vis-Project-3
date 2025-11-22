@@ -4,30 +4,16 @@
 (async function () {
   let rows;
   try {
-    rows = await d3.csv("data/cleanedData.csv");
+    rows = await d3.csv("data/Chart1Data.csv");
   } catch (err) {
     console.error("chart1 - CSV load error:", err);
     d3.select("#chart1")
       .append("div")
       .style("padding", "0.75rem")
       .style("font-size", "0.8rem")
-      .text("Could not load cleanedData.csv for jurisdiction chart.");
+      .text("Could not load Chart1Data.csv for jurisdiction chart.");
     return;
   }
-
-  rows.forEach(d => {
-    d.year = +(d.YEAR || d.year || 0);
-    d.jurisdiction = (d.JURISDICTION || d.jurisdiction || "").trim();
-    d.positive_count = +(
-      d.COUNT ||
-      d.count ||
-      d.POSITIVE_COUNT ||
-      d.positive_count ||
-      0
-    );
-  });
-
-  rows = rows.filter(d => d.year >= 2008 && d.year <= 2024 && d.jurisdiction);
 
   const jurisToStateName = {
     NSW: "New South Wales",
@@ -40,17 +26,25 @@
     ACT: "Australian Capital Territory"
   };
 
-  const agg = d3.rollups(
-    rows,
-    v => d3.sum(v, d => d.positive_count),
-    d => d.jurisdiction
-  )
-    .map(([jur, total]) => ({
-      jurisdiction: jur,
-      total,
-      name: jurisToStateName[jur] || jur
-    }))
-    .filter(d => d.total > 0);
+  const agg = rows
+    .map(d => {
+      const jurisdiction = (d.JURISDICTION || d.jurisdiction || "").trim();
+      const total = +(
+        d["Sum(COUNT)"] ||
+        d.total ||
+        d.count ||
+        d.POSITIVE_COUNT ||
+        d.positive_count ||
+        0
+      );
+
+      return {
+        jurisdiction,
+        total,
+        name: jurisToStateName[jurisdiction] || jurisdiction
+      };
+    })
+    .filter(d => d.jurisdiction && d.total > 0);
 
   agg.sort((a, b) => d3.descending(a.total, b.total));
 

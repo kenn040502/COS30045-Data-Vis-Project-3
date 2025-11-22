@@ -1,8 +1,8 @@
 // =====================================
-// CHART 2 — Radar + Choropleth by Location
+// CHART 4 - Radar + Choropleth by Location
 // =====================================
 
-function drawChart2(data, geoData) {
+function drawChart4(data, geoData) {
 
     // Build list of locations
     const locations = Array.from(
@@ -68,7 +68,7 @@ function drawChart2(data, geoData) {
 
 
 // =====================================
-// RADAR CHART — compact + refined
+// RADAR CHART - compact + refined
 // =====================================
 function createRadar(allData, containerSelector) {
     const container = d3.select(containerSelector);
@@ -244,7 +244,7 @@ function highlightRadarPoint(selectedLocation) {
 
 
 // =====================================
-// MAP — compact + aligned
+// MAP - compact + aligned
 // =====================================
 function createLocationMap(allData, geoData, containerSelector) {
     const container = d3.select(containerSelector);
