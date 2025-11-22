@@ -4,8 +4,8 @@ function drawChart3(data, geoData) {
   container.selectAll("*").remove();
 
   const bounds = container.node().getBoundingClientRect();
-  const width = Math.max(400, bounds.width || 900);
-  const height = Math.max(400, bounds.height || 700);
+  const width = Math.min(Math.max(360, bounds.width || window.innerWidth), 840);
+  const height = Math.max(320, Math.min(bounds.height || width * 0.48, 500));
 
   const svg = container.append("svg")
     .attr("viewBox", `0 0 ${width} ${height}`)

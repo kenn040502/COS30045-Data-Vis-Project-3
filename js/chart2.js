@@ -68,16 +68,18 @@
   container.selectAll("*").remove();
 
   const bounds = container.node().getBoundingClientRect();
-  const width = bounds.width || window.innerWidth;
+  const width = Math.min(bounds.width || window.innerWidth, 1200);
   const height = bounds.height || Math.max(window.innerHeight - 160, 450);
   const margin = { top: 25, right: 20, bottom: 60, left: 70 };
 
   const svg = container
     .append("svg")
     .attr("viewBox", `0 0 ${width} ${height}`)
-    .attr("preserveAspectRatio", "xMinYMin meet")
-    .attr("width", "100%")
-    .attr("height", height);
+    .attr("preserveAspectRatio", "xMidYMid meet")
+    .attr("width", width)
+    .attr("height", height)
+    .style("margin", "0 auto")
+    .style("display", "block");
 
   const x = d3.scalePoint()
     .domain(years)
