@@ -5,6 +5,7 @@
   const container = d3.select("#chart2");
   if (container.empty()) return;
   const infoBox = d3.select("#chart2-info");
+  const defaultInfoText = "Click to lock onto a year.";
 
   let rows;
   try {
@@ -65,6 +66,9 @@
     values: dataByYear.map(d => ({ year: d.year, value: d[stage] || 0 }))
   }));
 
+  let selectedIndex = null;
+  let selectedStage = null;
+
   container.selectAll("*").remove();
 
   const bounds = container.node().getBoundingClientRect();
@@ -116,6 +120,9 @@
   const stageGroup = svg.append("g")
     .attr("class", "stage-group");
 
+  const containerNode = container.node();
+  const svgNode = svg.node();
+
   // Draw order: Stage 1 (back), Stage 3 (middle), Stage 2 (front)
   const renderOrder = [
     "Stage 1 - Indicator",
@@ -156,8 +163,6 @@
     .style("box-shadow", "0 8px 16px rgba(0,0,0,0.35)")
     .style("opacity", 0);
 
-  const containerNode = container.node();
-
   function nearestYearIndex(mouseX) {
     let closest = 0;
     let minDist = Infinity;
@@ -178,6 +183,30 @@
       `${stage} = ${dataByYear[idx][stage].toLocaleString()}`
     );
     infoBox.html(`<strong>${year}</strong> - ${parts.join("; ")}`);
+  }
+
+  function renderSelection() {
+    if (selectedIndex === null) {
+      selectionLine.style("display", "none");
+      xAxisText.classed("selected", false);
+      setActiveStage(null);
+      infoBox.text(defaultInfoText);
+      return;
+    }
+
+    const year = years[selectedIndex];
+    const xPos = x(year);
+
+    selectionLine
+      .style("display", null)
+      .attr("x1", xPos)
+      .attr("x2", xPos)
+      .attr("y1", margin.top)
+      .attr("y2", height - margin.bottom);
+
+    xAxisText.classed("selected", d => d === year);
+    setActiveStage(selectedStage);
+    updateInfoForIndex(selectedIndex);
   }
 
   // selection line that tracks the pointer/click
@@ -275,7 +304,7 @@
     .attr("height", height - margin.top - margin.bottom)
     .attr("fill", "transparent")
     .on("mousemove", function (event) {
-      const [mx, my] = d3.pointer(event, containerNode);
+      const [mx, my] = d3.pointer(event, svgNode);
       const idx = nearestYearIndex(mx);
       const year = years[idx];
       const valueAtPointer = y.invert(my);
@@ -297,17 +326,19 @@
         html += `${stage}: ${val.toLocaleString()}<br>`;
       });
 
+      const rect = containerNode.getBoundingClientRect();
       tooltip
         .style("opacity", 1)
         .html(html)
-        .style("left", mx + 8 + "px")
-        .style("top", my + 8 + "px");
+        .style("left", event.clientX - rect.left + 8 + "px")
+        .style("top", event.clientY - rect.top + 8 + "px");
 
       updateInfoForIndex(idx);
 
-      xAxisText.classed("selected", function (d) {
-        return d === year;
-      });
+      const highlightYears = new Set(selectedIndex === null ? [] : [years[selectedIndex]]);
+      highlightYears.add(year);
+
+      xAxisText.classed("selected", d => highlightYears.has(d));
 
       const xPos = x(year);
       selectionLine
@@ -321,12 +352,10 @@
     })
     .on("mouseleave", () => {
       tooltip.style("opacity", 0);
-      selectionLine.style("display", "none");
-      xAxisText.classed("selected", false);
-      setActiveStage(null);
+      renderSelection();
     })
     .on("click", (event) => {
-      const [mx, my] = d3.pointer(event, containerNode);
+      const [mx, my] = d3.pointer(event, svgNode);
       const idx = nearestYearIndex(mx);
       const year = years[idx];
       const valueAtPointer = y.invert(my);
@@ -342,21 +371,17 @@
         }
       });
 
-      updateInfoForIndex(idx);
+      if (selectedIndex === idx) {
+        selectedIndex = null;
+        selectedStage = null;
+        renderSelection();
+        tooltip.style("opacity", 0);
+        return;
+      }
 
-      xAxisText.classed("selected", function (d) {
-        return d === year;
-      });
-
-      const xPos = x(year);
-      selectionLine
-        .style("display", null)
-        .attr("x1", xPos)
-        .attr("x2", xPos)
-        .attr("y1", margin.top)
-        .attr("y2", height - margin.bottom);
-
-      setActiveStage(activeStage);
+      selectedIndex = idx;
+      selectedStage = activeStage;
+      renderSelection();
     });
 
   // Seed info panel with the latest year

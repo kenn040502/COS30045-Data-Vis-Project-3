@@ -60,6 +60,8 @@
   container.selectAll("*").remove();
   const infoBox = d3.select("#chart1-info");
 
+  const defaultInfoText = "Click a bar to see totals.";
+
   const tooltip = container
     .append("div")
     .style("position", "absolute")
@@ -71,6 +73,57 @@
     .style("pointer-events", "none")
     .style("box-shadow", "0 8px 16px rgba(0,0,0,0.25)")
     .style("opacity", 0);
+
+  let selectedJurisdiction = null;
+
+  function showTooltip(d, coords, { includeTotal = true } = {}) {
+    const [mx, my] = coords;
+    const totalLine = includeTotal ? `Total positives: ${d.total.toLocaleString()}<br>` : "";
+
+    tooltip
+      .style("opacity", 1)
+      .html(
+        `<strong>${d.jurisdiction} - ${d.name}</strong><br>` +
+        totalLine +
+        `Cumulative: ${d.cumPct.toFixed(1)}%`
+      )
+      .style("left", (mx + 8) + "px")
+      .style("top", (my - 18) + "px");
+  }
+
+  function dimTo(targetJurisdiction) {
+    svg.selectAll("rect.bar")
+      .attr("opacity", b => {
+        if (!targetJurisdiction) return 0.9;
+        return b.jurisdiction === targetJurisdiction ? 1 : 0.35;
+      });
+
+    svg.selectAll("circle.pareto-point")
+      .attr("opacity", b => {
+        if (!targetJurisdiction) return 1;
+        return b.jurisdiction === targetJurisdiction ? 1 : 0.4;
+      });
+  }
+
+  function applySelection(targetJurisdiction) {
+    if (!targetJurisdiction) {
+      selectedJurisdiction = null;
+      svg.selectAll("rect.bar").classed("selected", false);
+      svg.selectAll("circle.pareto-point").classed("selected", false);
+      dimTo(null);
+      return;
+    }
+
+    selectedJurisdiction = targetJurisdiction;
+
+    svg.selectAll("rect.bar")
+      .classed("selected", b => b.jurisdiction === targetJurisdiction);
+
+    svg.selectAll("circle.pareto-point")
+      .classed("selected", b => b.jurisdiction === targetJurisdiction);
+
+    dimTo(targetJurisdiction);
+  }
 
   const bounds = container.node().getBoundingClientRect();
   const width = bounds.width || window.innerWidth;
@@ -106,6 +159,8 @@
         `${selected.total.toLocaleString()} positives ` +
         `(${selected.cumPct.toFixed(1)}% cumulative)`
       );
+    } else {
+      infoBox.text(defaultInfoText);
     }
   }
 
@@ -121,33 +176,32 @@
     .attr("height", 0)
     .attr("fill", "#00176B")
     .attr("opacity", 0.9)
+    .style("cursor", "pointer")
     .on("mouseenter", (event, d) => {
-      const [mx, my] = d3.pointer(event, container.node());
-      svg.selectAll("rect.bar").attr("opacity", b => b.jurisdiction === d.jurisdiction ? 1 : 0.35);
-      svg.selectAll("circle.pareto-point").attr("opacity", b => b.jurisdiction === d.jurisdiction ? 1 : 0.4);
-      tooltip
-        .style("opacity", 1)
-        .html(
-          `<strong>${d.jurisdiction} - ${d.name}</strong><br>` +
-          `Total positives: ${d.total.toLocaleString()}<br>` +
-          `Cumulative: ${d.cumPct.toFixed(1)}%`
-        )
-        .style("left", (mx + 8) + "px")
-        .style("top", (my - 18) + "px");
+      const coords = d3.pointer(event, container.node());
+      dimTo(d.jurisdiction);
+      showTooltip(d, coords);
       updateInfo(d.jurisdiction);
     })
-    .on("mousemove", (event) => {
-      const [mx, my] = d3.pointer(event, container.node());
-      tooltip
-        .style("left", (mx + 8) + "px")
-        .style("top", (my - 18) + "px");
+    .on("mousemove", (event, d) => {
+      const coords = d3.pointer(event, container.node());
+      showTooltip(d, coords);
     })
     .on("mouseleave", () => {
-      svg.selectAll("rect.bar").attr("opacity", 0.9);
-      svg.selectAll("circle.pareto-point").attr("opacity", 1);
+      dimTo(selectedJurisdiction);
       tooltip.style("opacity", 0);
     })
-    .on("click", (event, d) => updateInfo(d.jurisdiction));
+    .on("click", (event, d) => {
+      if (selectedJurisdiction === d.jurisdiction) {
+        applySelection(null);
+        updateInfo(null);
+        tooltip.style("opacity", 0);
+        return;
+      }
+      applySelection(d.jurisdiction);
+      showTooltip(d, d3.pointer(event, container.node()));
+      updateInfo(d.jurisdiction);
+    });
 
   bars.transition()
     .duration(800)
@@ -188,26 +242,32 @@
     .attr("cy", d => yRight(d.cumPct))
     .attr("r", 0)
     .attr("fill", "#f97316")
+    .style("cursor", "pointer")
     .on("mouseenter", (event, d) => {
-      const [mx, my] = d3.pointer(event, container.node());
-      tooltip
-        .style("opacity", 1)
-        .html(
-          `<strong>${d.jurisdiction} - ${d.name}</strong><br>` +
-          `Cumulative: ${d.cumPct.toFixed(1)}%`
-        )
-        .style("left", (mx + 8) + "px")
-        .style("top", (my - 18) + "px");
+      const coords = d3.pointer(event, container.node());
+      dimTo(d.jurisdiction);
+      showTooltip(d, coords, { includeTotal: false });
       updateInfo(d.jurisdiction);
     })
-    .on("mousemove", (event) => {
-      const [mx, my] = d3.pointer(event, container.node());
-      tooltip
-        .style("left", (mx + 8) + "px")
-        .style("top", (my - 18) + "px");
+    .on("mousemove", (event, d) => {
+      const coords = d3.pointer(event, container.node());
+      showTooltip(d, coords, { includeTotal: false });
     })
-    .on("mouseleave", () => tooltip.style("opacity", 0))
-    .on("click", (event, d) => updateInfo(d.jurisdiction));
+    .on("mouseleave", () => {
+      dimTo(selectedJurisdiction);
+      tooltip.style("opacity", 0);
+    })
+    .on("click", (event, d) => {
+      if (selectedJurisdiction === d.jurisdiction) {
+        applySelection(null);
+        updateInfo(null);
+        tooltip.style("opacity", 0);
+        return;
+      }
+      applySelection(d.jurisdiction);
+      showTooltip(d, d3.pointer(event, container.node()), { includeTotal: false });
+      updateInfo(d.jurisdiction);
+    });
 
   paretoPoints
     .transition()
