@@ -115,7 +115,6 @@ body {
   background: var(--navy-soft);
   transform: translateY(-3px);
 }
-
 /* Feature / Background panel under hero */
 .feature {
   padding: 1.6rem 1.5rem 2rem;
