@@ -80,6 +80,13 @@ body {
   color: var(--muted);
   font-size: 1rem;
 }
+.hero-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 0.6rem;
+}
 .hero-btn {
   display: inline-block;
   background: var(--navy);
@@ -91,6 +98,21 @@ body {
   box-shadow: 0 8px 20px rgba(0,23,107,0.08);
 }
 .hero-btn:hover {
+  transform: translateY(-3px);
+}
+.hero-secondary {
+  display: inline-block;
+  border: 1px solid var(--navy);
+  background: var(--white);
+  color: var(--navy);
+  padding: 0.85rem 1.3rem;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(0,23,107,0.05);
+}
+.hero-secondary:hover {
+  background: var(--navy-soft);
   transform: translateY(-3px);
 }
 
@@ -192,6 +214,9 @@ body {
 
 .top-right {
   margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
 }
 
 .tag {
@@ -624,3 +649,57 @@ body {
 .viz-body { padding: 0.9rem 1rem 1.2rem; }
 .viz-title { margin: 0 0 0.4rem 0; font-size: 0.95rem; color: var(--navy); }
 .viz-desc { margin: 0; font-size: 0.85rem; color: var(--muted); }
+
+/* About page */
+.about-grid {
+  display: grid;
+  gap: 0.9rem;
+  align-items: stretch;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+.about-card {
+  border: 1px solid var(--navy-grey);
+  background: var(--white);
+  border-radius: 12px;
+  padding: 0.9rem 1rem 1rem;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.04);
+}
+.about-name {
+  margin: 0 0 0.25rem 0;
+  color: var(--navy);
+  font-size: 1rem;
+  font-weight: 700;
+}
+.about-id {
+  margin: 0 0 0.55rem 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.about-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.6rem;
+}
+.about-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  background: var(--navy-soft);
+  color: var(--navy);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.about-text {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text);
+  text-align: justify;
+  text-justify: inter-word;
+  -webkit-hyphens: auto;
+  -ms-hyphens: auto;
+  hyphens: auto;
+}
