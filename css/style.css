@@ -403,6 +403,13 @@ body {
   color: var(--black);
 }
 
+.chart-note {
+  margin-top: 0.15rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
 /* FOOTER */
 
 .footer {
