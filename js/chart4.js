@@ -73,6 +73,7 @@ function drawChart4(data, geoData) {
 function createRadar(allData, containerSelector) {
     const container = d3.select(containerSelector);
     container.selectAll("*").remove();
+    container.style("position", "relative");
 
     const bounds = container.node().getBoundingClientRect();
     const width = Math.max(360, bounds.width || 420);
@@ -193,9 +194,18 @@ function createRadar(allData, containerSelector) {
         .style("font-size", "12px")
         .style("pointer-events", "none")
         .style("opacity", 0);
+    const moveTooltip = (event) => {
+        const rect = container.node().getBoundingClientRect();
+        const x = event.clientX - rect.left + 12;
+        const y = event.clientY - rect.top - 18;
+        tooltip
+            .style("left", `${x}px`)
+            .style("top", `${y}px`);
+    };
 
     g.selectAll(".radar-point")
         .on("mouseover", function (event, d) {
+            moveTooltip(event);
             tooltip.style("opacity", 1).html(`
                 <strong>${d.location}</strong><br>
                 Total Tests: ${d.total}<br>
@@ -204,9 +214,7 @@ function createRadar(allData, containerSelector) {
             `);
         })
         .on("mousemove", function (event) {
-            tooltip
-                .style("left", event.pageX + 12 + "px")
-                .style("top", event.pageY - 20 + "px");
+            moveTooltip(event);
         })
         .on("mouseout", () => tooltip.style("opacity", 0));
 }
@@ -249,6 +257,7 @@ function highlightRadarPoint(selectedLocation) {
 function createLocationMap(allData, geoData, containerSelector) {
     const container = d3.select(containerSelector);
     container.selectAll("*").remove();
+    container.style("position", "relative");
 
     const bounds = container.node().getBoundingClientRect();
     const width = Math.max(360, bounds.width || 420);
@@ -285,6 +294,14 @@ function createLocationMap(allData, geoData, containerSelector) {
         .style("pointer-events", "none")
         .style("box-shadow", "0 2px 8px rgba(0,0,0,0.2)")
         .style("opacity", 0);
+    const moveTooltip = (event) => {
+        const rect = container.node().getBoundingClientRect();
+        const x = event.clientX - rect.left + 12;
+        const y = event.clientY - rect.top - 18;
+        tooltip
+            .style("left", `${x}px`)
+            .style("top", `${y}px`);
+    };
 
     const states = svg.selectAll("path.state")
         .data(geoData.features)
@@ -382,6 +399,8 @@ function createLocationMap(allData, geoData, containerSelector) {
                 const rate = total ? (pos / total) * 100 : 0;
                 const share = grandTotal ? (total / grandTotal) * 100 : 0;
 
+                moveTooltip(event);
+
                 tooltip
                     .style("opacity", 1)
                     .html(`
@@ -401,9 +420,7 @@ function createLocationMap(allData, geoData, containerSelector) {
                 stateLabels.raise();
             })
             .on("mousemove", function (event) {
-                tooltip
-                    .style("left", event.pageX + 12 + "px")
-                    .style("top", event.pageY - 20 + "px");
+                moveTooltip(event);
             })
             .on("mouseout", function () {
                 tooltip.style("opacity", 0);

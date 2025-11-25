@@ -2,6 +2,7 @@ function drawChart3(data, geoData) {
 
   const container = d3.select("#chart3");
   container.selectAll("*").remove();
+  container.style("position", "relative");
 
   const bounds = container.node().getBoundingClientRect();
   const width = Math.min(Math.max(360, bounds.width || window.innerWidth), 840);
@@ -28,6 +29,14 @@ function drawChart3(data, geoData) {
     .style("pointer-events", "none")
     .style("box-shadow", "0 2px 8px rgba(0,0,0,0.15)")
     .style("opacity", 0);
+  const moveTooltip = (event) => {
+    const rect = container.node().getBoundingClientRect();
+    const x = event.clientX - rect.left + 14;
+    const y = event.clientY - rect.top - 18;
+    tooltip
+      .style("left", `${x}px`)
+      .style("top", `${y}px`);
+  };
 
   const projection = d3.geoMercator()
     .center([134, -28])
@@ -220,12 +229,14 @@ function drawChart3(data, geoData) {
         }
     }
 
-    tooltip
-        .style("left", event.pageX + 15 + "px")
-        .style("top", event.pageY - 20 + "px")
-        .transition()
+    moveTooltip(event);
+
+    tooltip.transition()
         .duration(150)
         .style("opacity", 1);
+  })
+  .on("mousemove", function (event) {
+    moveTooltip(event);
   })
 
   .on("mouseleave", function (event, d) {
