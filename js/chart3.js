@@ -1,5 +1,4 @@
 function drawChart3(data, geoData) {
-
   const container = d3.select("#chart3");
   container.selectAll("*").remove();
 
@@ -13,7 +12,6 @@ function drawChart3(data, geoData) {
     .attr("width", "100%")
     .attr("height", "100%");
 
-  // Group for all map layers (enables zoom/pan)
   const mapGroup = svg.append("g").attr("class", "map-group");
 
   // Tooltip
@@ -23,8 +21,8 @@ function drawChart3(data, geoData) {
     .style("background", "rgba(255,255,255,0.95)")
     .style("border", "1px solid #ccc")
     .style("border-radius", "6px")
-    .style("padding", "8px 40px")
-    .style("font-size", "13px")
+    .style("padding", "8px 16px")
+    .style("font-size", "12px")
     .style("pointer-events", "none")
     .style("box-shadow", "0 2px 8px rgba(0,0,0,0.15)")
     .style("opacity", 0);
@@ -32,12 +30,10 @@ function drawChart3(data, geoData) {
   const projection = d3.geoMercator()
     .center([134, -28])
     .scale(400)
-    // Nudge map upward to reduce excess whitespace below
     .translate([width / 2, height / 2 - 60]);
 
   const path = d3.geoPath().projection(projection);
 
-  // Drugs
   const roadsideDrugs = [
     "Amphetamine",
     "Cannabis",
@@ -75,7 +71,6 @@ function drawChart3(data, geoData) {
     act: "australian capital territory"
   };
 
-  // Normalize to match GeoJSON
   const normalizedStats = new Map();
   statsMap.forEach((value, key) => {
     const full = jurisdictionMap[key] || key;
@@ -88,56 +83,48 @@ function drawChart3(data, geoData) {
     const id = "grad-" + name.replace(/\s+/g, "-");
     defs.select("#" + id).remove();
 
-    // Identify largest polygon
     let largest = null;
     let maxArea = -Infinity;
 
     feature.geometry.coordinates.forEach(poly => {
-        const area = d3.polygonArea(poly[0]);
-        if (Math.abs(area) > maxArea) {
-            maxArea = Math.abs(area);
-            largest = poly[0];
-        }
+      const area = d3.polygonArea(poly[0]);
+      if (Math.abs(area) > maxArea) {
+        maxArea = Math.abs(area);
+        largest = poly[0];
+      }
     });
 
-    // Project coordinates into screen space
     const projectedPoints = largest.map(p => projection(p));
-
     const xs = projectedPoints.map(p => p[0]);
     const minX = Math.min(...xs);
     const maxX = Math.max(...xs);
 
     const grad = defs.append("linearGradient")
-        .attr("id", id)
-        .attr("gradientUnits", "userSpaceOnUse")
-        .attr("x1", minX)
-        .attr("y1", 0)
-        .attr("x2", maxX)
-        .attr("y2", 0);
+      .attr("id", id)
+      .attr("gradientUnits", "userSpaceOnUse")
+      .attr("x1", minX)
+      .attr("y1", 0)
+      .attr("x2", maxX)
+      .attr("y2", 0);
 
-    // Build slices
-    const drugs = ["Amphetamine", "Cannabis", "Ecstasy", "Methylamphetamine"];
     let accumulated = 0;
+    roadsideDrugs.forEach(drug => {
+      const pct = stats[drug];
+      if (pct > 0) {
+        grad.append("stop")
+          .attr("offset", `${accumulated}%`)
+          .attr("stop-color", drugColors[drug]);
 
-    drugs.forEach(drug => {
-        const pct = stats[drug];
-        if (pct > 0) {
-            grad.append("stop")
-                .attr("offset", `${accumulated}%`)
-                .attr("stop-color", drugColors[drug]);
+        accumulated += pct;
 
-            accumulated += pct;
-
-            grad.append("stop")
-                .attr("offset", `${accumulated}%`)
-                .attr("stop-color", drugColors[drug]);
-        }
+        grad.append("stop")
+          .attr("offset", `${accumulated}%`)
+          .attr("stop-color", drugColors[drug]);
+      }
     });
 
     return `url(#${id})`;
-}
-
-
+  }
 
   function getDominantDrug(stats) {
     return roadsideDrugs.reduce((a, b) =>
@@ -164,13 +151,12 @@ function drawChart3(data, geoData) {
     .attr("opacity", 0)
     .style("cursor", "pointer");
 
-  // Fade states in sequentially
   states.transition()
     .duration(650)
     .delay((_, i) => i * 80)
     .attr("opacity", 1);
 
-  // Hover
+  // Hover tooltip
   states.on("mouseenter", function (event, d) {
     const name = (d.properties.STATE_NAME ||
       d.properties.STE_NAME16 ||
@@ -180,7 +166,6 @@ function drawChart3(data, geoData) {
 
     const stats = normalizedStats.get(name);
 
-    // If this is NOT the selected state -> highlight border
     if (selected !== name) {
       d3.select(this)
         .transition()
@@ -189,36 +174,30 @@ function drawChart3(data, geoData) {
         .attr("stroke-width", 2);
     }
 
-    // =========================================
-    // TOOLTIP LOGIC
-    // =========================================
-
     if (selected === null) {
-      // NOTHING SELECTED -> show detailed tooltip
       if (stats && stats.total > 0) {
-          tooltip.html(`
-              <strong>${d.properties.STATE_NAME}</strong><br>
-              Total Positive: ${stats.total}<br><br>
-              Amphetamine: ${stats.Amphetamine || 0}%<br>
-              Cannabis: ${stats.Cannabis || 0}%<br>
-              Ecstasy: ${stats.Ecstasy || 0}%<br>
-              Methylamphetamine: ${stats.Methylamphetamine|| 0}%
-          `);
+        tooltip.html(`
+          <strong>${d.properties.STATE_NAME}</strong><br>
+          Total Positive: ${stats.total}<br><br>
+          Amphetamine: ${stats.Amphetamine || 0}%<br>
+          Cannabis: ${stats.Cannabis || 0}%<br>
+          Ecstasy: ${stats.Ecstasy || 0}%<br>
+          Methylamphetamine: ${stats.Methylamphetamine || 0}%
+        `);
       } else {
-          tooltip.html(`<strong>${d.properties.STATE_NAME}</strong><br><em>No data</em>`);
+        tooltip.html(`<strong>${d.properties.STATE_NAME}</strong><br><em>No data</em>`);
       }
     } else {
-        // ANOTHER STATE IS SELECTED -> show only "Click to explore"
-        if (selected !== name) {
-            tooltip.html(`
-              <strong>${d.properties.STATE_NAME}</strong><br/>
-              <em>Click to explore</em>
-            `);
-        } else {
-            // Hover over the selected state -> show NOTHING (panel already visible)
-            return;
-        }
+      if (selected !== name) {
+        tooltip.html(`
+          <strong>${d.properties.STATE_NAME}</strong><br/>
+          <em>Click to explore</em>
+        `);
+      } else {
+        return;
+      }
     }
+
     const [mouseX, mouseY] = d3.pointer(event, container.node());
 
     tooltip
@@ -228,8 +207,7 @@ function drawChart3(data, geoData) {
       .duration(150)
       .style("opacity", 1);
   })
-
-  .on("mouseleave", function (event, d) {
+    .on("mouseleave", function (event, d) {
       const name = (d.properties.STATE_NAME ||
         d.properties.STE_NAME16 ||
         d.properties.name ||
@@ -237,21 +215,30 @@ function drawChart3(data, geoData) {
       ).trim().toLowerCase();
 
       if (selected !== name) {
-          d3.select(this)
-              .transition()
-              .duration(180)
-              .attr("stroke-width", 0.8)
+        d3.select(this)
+          .transition()
+          .duration(180)
+          .attr("stroke-width", 0.8)
+          .attr("stroke", defaultStroke);
       }
 
       tooltip.transition().duration(150).style("opacity", 0);
-  });
+    });
 
-  // CLICK
+  // CLICK – stats panel (narrow & tall)
   states.on("click", function (event, d) {
     const name = (d.properties.STATE_NAME || "").trim().toLowerCase();
     const stats = normalizedStats.get(name);
 
-    // RESET state
+    // Narrower + taller panel
+    const basePanelWidth = 260;    // narrower
+    const basePanelHeight = 130;   // taller
+    const panelWidth = Math.min(basePanelWidth, width * 0.8);
+    const panelHeight = basePanelHeight;
+    const panelX = (width - panelWidth) / 2;
+    const panelY = height - panelHeight - 22;
+
+    // Reset
     if (selected === name) {
       selected = null;
 
@@ -270,7 +257,7 @@ function drawChart3(data, geoData) {
 
     selected = name;
 
-    // Grey out all others
+    // Grey out others
     states.transition().duration(300)
       .attr("fill", d => {
         const nm = (d.properties.STATE_NAME || "").trim().toLowerCase();
@@ -287,90 +274,98 @@ function drawChart3(data, geoData) {
 
     svg.select("#statsPanel").remove();
 
-    // NO DATA MODE
+    // NO DATA PANEL
     if (!stats || stats.total === 0) {
       const panel = svg.append("g")
         .attr("id", "statsPanel")
-        .attr("transform", `translate(${width / 2 - 330}, ${height - 140})`);
+        .attr("transform", `translate(${panelX}, ${panelY + 30})`)
+        .style("opacity", 0);
 
       panel.append("rect")
-        .attr("width", 360)
-        .attr("height", 85)
+        .attr("width", panelWidth)
+        .attr("height", panelHeight)
         .attr("rx", 8)
         .attr("ry", 8)
         .attr("fill", "rgba(255,255,255,0.97)")
-        .attr("stroke", "#ddd");
+        .attr("stroke", "#bbb");
+
+      panel.transition()
+        .duration(450)
+        .style("opacity", 1)
+        .attr("transform", `translate(${panelX}, ${panelY})`);
 
       panel.append("text")
-        .attr("x", 180)
-        .attr("y", 25)
+        .attr("x", panelWidth / 2)
+        .attr("y", 24)
         .attr("text-anchor", "middle")
-        .style("font-size", "15px")
+        .style("font-size", "14px")
         .style("font-weight", "bold")
         .style("fill", "#ff9800")
-        .text(`${d.properties.STATE_NAME}`);
+        .text(`${d.properties.STATE_NAME}`)
+        .style("opacity", 0)
+        .transition()
+        .duration(350)
+        .delay(150)
+        .style("opacity", 1);
 
-      const noDataMsg = panel.append('text')
-        .attr("x", 180)
+      panel.append("text")
+        .attr("x", panelWidth / 2)
         .attr("y", 50)
         .attr("text-anchor", "middle")
-        .style("font-size", "13px")
+        .style("font-size", "12px")
         .style("fill", "#999")
-        .text("No data available for this jurisdiction");
+        .text("No data available for this jurisdiction")
+        .style("opacity", 0)
+        .transition()
+        .duration(350)
+        .delay(250)
+        .style("opacity", 1);
 
-      noDataMsg.transition().duration(400).delay(150).style('opacity', 1);
-      
-      // Helpful hint with animation
-      const noDataHint = panel.append('text')
-        .attr('x', 180)
-        .attr('y', 68)
-        .attr('text-anchor', 'middle')
-        .style('font-size', '11px')
-        .style('fill', '#bbb')
-        .style('font-style', 'italic')
-        .style('opacity', 0)
-        .text('(Data prior to 2021 unavailable. NT data limited.)');
-      
-      noDataHint.transition().duration(400).delay(200).style('opacity', 1);
+      panel.append("text")
+        .attr("x", panelWidth / 2)
+        .attr("y", 70)
+        .attr("text-anchor", "middle")
+        .style("font-size", "11px")
+        .style("fill", "#bbb")
+        .style("font-style", "italic")
+        .text("(Data prior to 2021 unavailable. NT data limited.)")
+        .style("opacity", 0)
+        .transition()
+        .duration(350)
+        .delay(350)
+        .style("opacity", 1);
 
       return;
     }
 
-    // NORMAL MODE - apply gradient
+    // NORMAL MODE – gradient fill
     const gradFill = createGradient(name, stats, d);
     d3.select(this).transition().duration(600)
       .attr("fill", gradFill);
 
-    // Remove existing panel
-    svg.select("#statsPanel").remove();
-
-    // Create panel
     const panel = svg.append("g")
       .attr("id", "statsPanel")
-      .attr("transform", `translate(${width / 2 - 330}, ${height - 140 + 30})`)  // start lower (for slide animation)
+      .attr("transform", `translate(${panelX}, ${panelY + 30})`)
       .style("opacity", 0);
 
-    // Background
     panel.append("rect")
-      .attr("width", 480)
-      .attr("height", 95)
+      .attr("width", panelWidth)
+      .attr("height", panelHeight)
       .attr("rx", 8)
       .attr("ry", 8)
       .attr("fill", "rgba(255,255,255,0.97)")
       .attr("stroke", "#bbb");
 
-    // Slide + fade animation
     panel.transition()
       .duration(450)
       .style("opacity", 1)
-      .attr("transform", `translate(${width / 2 - 330}, ${height - 140})`);
+      .attr("transform", `translate(${panelX}, ${panelY})`);
 
-    // Title
     panel.append("text")
-      .attr("x", 240)
+      .attr("x", panelWidth / 2)
       .attr("y", 22)
       .attr("text-anchor", "middle")
-      .style("font-size", "15px")
+      .style("font-size", "14px")
       .style("font-weight", "bold")
       .style("opacity", 0)
       .text(`${d.properties.STATE_NAME} - Statistics`)
@@ -379,12 +374,11 @@ function drawChart3(data, geoData) {
       .delay(150)
       .style("opacity", 1);
 
-    // Total tests
     panel.append("text")
-      .attr("x", 240)
-      .attr("y", 44)
+      .attr("x", panelWidth / 2)
+      .attr("y", 42)
       .attr("text-anchor", "middle")
-      .style("font-size", "13px")
+      .style("font-size", "12px")
       .style("opacity", 0)
       .text(`Total Positive Tests: ${stats.total}`)
       .transition()
@@ -392,30 +386,36 @@ function drawChart3(data, geoData) {
       .delay(250)
       .style("opacity", 1);
 
-    // Drug breakdown
+    // 2 × 2 legend grid (narrow & tall panel)
+    const legendCols = 2;
+    const cellWidth = panelWidth / legendCols;
+    const cellHeight = 28;
+
     roadsideDrugs.forEach((drug, i) => {
+      const col = i % legendCols;
+      const row = Math.floor(i / legendCols);
+
       const group = panel.append("g")
-        .attr("transform", `translate(${30 + i * 110}, 65)`)
+        .attr("transform", `translate(${col * cellWidth + 12}, ${58 + row * cellHeight})`)
         .style("opacity", 0);
 
       group.append("circle")
-        .attr("r", 7)
+        .attr("r", 6)
         .attr("fill", drugColors[drug]);
 
       group.append("text")
-        .attr("x", 14)
+        .attr("x", 12)
         .attr("y", 4)
-        .style("font-size", "11px")
-        .text(`${drug}`);
+        .style("font-size", "10px")
+        .text(drug);
 
       group.append("text")
-        .attr("x", 14)
-        .attr("y", 15)
-        .style("font-size", "10px")
+        .attr("x", 12)
+        .attr("y", 16)
+        .style("font-size", "9px")
         .style("fill", "#666")
         .text(`${stats[drug]}%`);
 
-      // Animated reveal
       group.transition()
         .duration(300)
         .delay(350 + i * 150)
@@ -423,31 +423,31 @@ function drawChart3(data, geoData) {
     });
   });
 
-  // Labels
+  // Labels on map
   mapGroup.selectAll(".state-label")
     .data(geoData.features)
     .join("text")
     .attr("class", "state-label")
     .attr("transform", d => `translate(${path.centroid(d)})`)
     .attr("text-anchor", "middle")
-    .style("font-size", "12px")
+    .style("font-size", "8px")
     .style("font-weight", "bold")
     .text(d => d.properties.STATE_NAME);
 
+  // Notes (two separate lines)
   svg.append("text")
     .attr("x", width / 2)
-    .attr("y", height - 10)
+    .attr("y", height - 22)
     .attr("text-anchor", "middle")
-    .style("font-size", "11px")
+    .style("font-size", "10px")
     .style("fill", "#555")
-    .text("Note: Data prior to 2021 and NT data (2023-2024) unavailable due to data quality issues. NSW confirmatory testing discontinued since Sept 2024.")
-    .text("Note: Data for Australia Capital Territory data are not shown due to the constraints on showing its location on the map.");
+    .text("Data prior to 2021 and NT (2023–2024) unavailable. NSW confirmatory testing stopped in Sept 2024.");
 
-  // Zoom + pan interaction
-  // const zoom = d3.zoom()
-  //   .scaleExtent([0.8, 3])
-  //   .translateExtent([[0, 0], [width, height]])
-  //   .on("zoom", (event) => mapGroup.attr("transform", event.transform));
-
-  // svg.call(zoom);
+  svg.append("text")
+    .attr("x", width / 2)
+    .attr("y", height - 8)
+    .attr("text-anchor", "middle")
+    .style("font-size", "10px")
+    .style("fill", "#555")
+    .text("ACT is omitted due to constraints in displaying its location at this map scale.");
 }
