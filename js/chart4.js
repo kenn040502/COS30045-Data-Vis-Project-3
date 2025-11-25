@@ -76,7 +76,7 @@ function createRadar(allData, containerSelector) {
 
     const bounds = container.node().getBoundingClientRect();
     const width = Math.max(360, bounds.width || 420);
-    const height = Math.max(260, bounds.height); 
+    const height = Math.max(320, bounds.height || 360);
     const radius = Math.min(width, height) * 0.42;
 
     const svg = container
@@ -183,7 +183,7 @@ function createRadar(allData, containerSelector) {
         .attr("stroke-width", 1.2);
 
     // Tooltip
-    const tooltip = container
+    const tooltip = d3.select("body")
         .append("div")
         .attr("class", "radar-tooltip")
         .style("position", "absolute")
@@ -252,7 +252,7 @@ function createLocationMap(allData, geoData, containerSelector) {
 
     const bounds = container.node().getBoundingClientRect();
     const width = Math.max(360, bounds.width || 420);
-    const height = Math.max(260, bounds.height);
+    const height = Math.max(320, bounds.height || 360);
 
     const svg = container
         .append("svg")
@@ -274,7 +274,7 @@ function createLocationMap(allData, geoData, containerSelector) {
     const path = d3.geoPath().projection(projection);
 
     // Tooltip
-    const tooltip = container
+    const tooltip = d3.select("body")
         .append("div")
         .attr("class", "tooltip")
         .style("position", "absolute")

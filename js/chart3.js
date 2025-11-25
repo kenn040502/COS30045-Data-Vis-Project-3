@@ -31,7 +31,7 @@ function drawChart3(data, geoData) {
 
   const projection = d3.geoMercator()
     .center([134, -28])
-    .scale(800)
+    .scale(400)
     // Nudge map upward to reduce excess whitespace below
     .translate([width / 2, height / 2 - 60]);
 
@@ -219,13 +219,14 @@ function drawChart3(data, geoData) {
             return;
         }
     }
+    const [mouseX, mouseY] = d3.pointer(event, container.node());
 
     tooltip
-        .style("left", event.pageX + 15 + "px")
-        .style("top", event.pageY - 20 + "px")
-        .transition()
-        .duration(150)
-        .style("opacity", 1);
+      .style("left", (mouseX + 15) + "px")
+      .style("top", (mouseY - 20) + "px")
+      .transition()
+      .duration(150)
+      .style("opacity", 1);
   })
 
   .on("mouseleave", function (event, d) {
@@ -443,10 +444,10 @@ function drawChart3(data, geoData) {
     .text("Note: Data for Australia Capital Territory data are not shown due to the constraints on showing its location on the map.");
 
   // Zoom + pan interaction
-  const zoom = d3.zoom()
-    .scaleExtent([0.8, 3])
-    .translateExtent([[0, 0], [width, height]])
-    .on("zoom", (event) => mapGroup.attr("transform", event.transform));
+  // const zoom = d3.zoom()
+  //   .scaleExtent([0.8, 3])
+  //   .translateExtent([[0, 0], [width, height]])
+  //   .on("zoom", (event) => mapGroup.attr("transform", event.transform));
 
-  svg.call(zoom);
+  // svg.call(zoom);
 }
