@@ -24,17 +24,21 @@
     <main class="dashboard fullscreen">
       <section class="card">
         <h2 style="margin:20px; text-align:center; font-size:18px;">Detection Methods Over Time</h2>
-        <div style="background:#f8faff; border-left:4px solid #00176B; padding:14px 18px; margin:8px 0 14px 0; font-size:12px; line-height:1.2;">
-          <strong style="font-size:13px; color:#00176B;">
-            How to interpret this visualisation:
-          </strong>
-          <br><br>
-          This <strong>layered area chart</strong> shows the positive roadside tests by detection stage (<strong>Stage 1 - Indicator</strong>; <strong>Stage 2 - Confirmatory</strong>; <strong>Stage 3 - Laboratory</strong>) from 2008 to 2024.
-          <br><br>
-          - <strong>Hover</strong> to see the year-by-year totals for each stage; the info bar below updates with exact counts.<br>
-          - <strong>Click a year</strong> to lock the dashed selector line and keep that year highlighted.<br>
-          - Hover near a layer to see which stage is closest to your pointer; overlapping layers may reduce readability, so use the <strong>legend</strong> to isolate a stage.
-        </div>
+        <details class="info-panel" data-mobile-collapsible open>
+          <summary>
+            <span class="info-chip">Guide</span>
+            <span>How to interpret this visualisation</span>
+            <span class="info-toggle-hint">Tap to toggle</span>
+          </summary>
+          <div class="info-body">
+            <p>This <strong>layered area chart</strong> shows the positive roadside tests by detection stage (<strong>Stage 1 - Indicator</strong>; <strong>Stage 2 - Confirmatory</strong>; <strong>Stage 3 - Laboratory</strong>) from 2008 to 2024.</p>
+            <ul class="info-list">
+              <li><strong>Hover</strong> to see the year-by-year totals for each stage; the info bar below updates with exact counts.</li>
+              <li><strong>Click a year</strong> to lock the dashed selector line and keep that year highlighted.</li>
+              <li>Hover near a layer to see which stage is closest to your pointer; if layers overlap, use the <strong>legend</strong> to isolate a stage.</li>
+            </ul>
+          </div>
+        </details>
         <div id="chart2" class="chart-container centered-chart"></div>
         <div id="chart2-info" class="chart-info">Click to lock onto a year.</div>
       </section>
@@ -63,6 +67,11 @@
           if(e.key === 'ArrowLeft') location.href = prev;
           if(e.key === 'ArrowRight') location.href = next;
         });
+      })();
+      (function(){
+        if (window.matchMedia('(max-width: 780px)').matches) {
+          document.querySelectorAll('[data-mobile-collapsible]').forEach(el => el.removeAttribute('open'));
+        }
       })();
     </script>
   </body>

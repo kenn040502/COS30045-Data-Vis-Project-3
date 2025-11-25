@@ -24,20 +24,18 @@
     <main class="dashboard fullscreen">
       <section class="card">
         <h1 style="margin:20px; text-align: center; font-size:18px;">Dominant Drug-Positive Roadside Tests by Jurisdiction (2023-2024)</h1>
-        <p style="font-size:12px; color:#333; line-height:1.2; margin:8px 0 14px 0; background:#f9fafc; padding:14px 18px; border-left:4px solid #4e79a7; border-radius:6px;">
-          Explore the <strong>interactive map</strong> to understand which drug types are most frequently detected 
-          across Australian jurisdictions. Each state is coloured by its <strong>dominant positive roadside 
-          drug detection</strong> based on aggregated test data. Hover over a state to view detailed 
-          positivity percentages for each drug type.
-          <br><br>
-          <strong>Click on any state</strong> to reveal a breakdown panel showing the exact proportion of 
-          <strong>Amphetamine, Cannabis, Ecstasy, and Methylamphetamine</strong> detections within that jurisdiction. 
-          Unselected states will dim automatically, helping you focus attention on the selected region.
-          <br><br>
-          The <strong>gradient fill</strong> displayed after clicking a state illustrates the relative contribution 
-          of each drug type. This enables easy comparison of drug prevalence patterns across the 
-          country, giving a comprehensive view of <strong>drug-related roadside testing outcomes</strong>.
-        </p>
+        <details class="info-panel" data-mobile-collapsible open style="--info-accent:#4e79a7;">
+          <summary>
+            <span class="info-chip">Guide</span>
+            <span>How to interpret this visualisation</span>
+            <span class="info-toggle-hint">Tap to toggle</span>
+          </summary>
+          <div class="info-body">
+            <p>Explore the interactive map to understand which drug types are most frequently detected across Australian jurisdictions. Each state is coloured by its dominant positive roadside drug detection based on aggregated test data. Hover over a state to view detailed positivity percentages for each drug type.</p>
+            <p><strong>Click on any state</strong> to reveal a breakdown panel showing the exact proportion of Amphetamine, Cannabis, Ecstasy, and Methylamphetamine detections within that jurisdiction. Unselected states dim automatically to help focus on the selected region.</p>
+            <p>The <strong>gradient fill</strong> displayed after clicking a state illustrates the relative contribution of each drug type. This enables easy comparison of drug prevalence patterns across the country, giving a comprehensive view of drug-related roadside testing outcomes.</p>
+          </div>
+        </details>
         <div id="chart3" class="responsive-svg-container"></div>
       </section>
     </main>
@@ -66,6 +64,11 @@
           if(e.key === 'ArrowLeft') location.href = prev;
           if(e.key === 'ArrowRight') location.href = next;
         });
+      })();
+      (function(){
+        if (window.matchMedia('(max-width: 780px)').matches) {
+          document.querySelectorAll('[data-mobile-collapsible]').forEach(el => el.removeAttribute('open'));
+        }
       })();
     </script>
   </body>

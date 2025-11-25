@@ -23,20 +23,22 @@
 
     <main class="dashboard fullscreen">
       <section class="card">
-        <div style="background:#f8faff; border-left:4px solid #00176B; padding:14px 18px; margin:8px 0 14px 0;
-          font-size:12px;line-height:1.2;">
-          <strong style="font-size:13px; color:#00176B;">
-            How to interpret this visualisation:
-          </strong>
-          <br><br>
-          This interactive chart displays the <strong>total number of positive roadside drug test results</strong> across all age groups
-          from 2008 to 2024.  
-          <br><br>
-          - The <strong>Compare 2023 & 2024 Trends button</strong> allows you to compare the overall scale of enforcement activity between 2023 and 2024.<br>
-          - The <strong>Pareto bars</strong> show the number of positive results for each age group.<br>
-          - The <strong>Pareto line</strong> reveals how each age group contributes cumulatively to all positive detections.<br><br>
-          Hover over the bars and line points to view exact values.  
-        </div>
+        <details class="info-panel" data-mobile-collapsible open>
+          <summary>
+            <span class="info-chip">Guide</span>
+            <span>How to interpret this visualisation</span>
+            <span class="info-toggle-hint">Tap to toggle</span>
+          </summary>
+          <div class="info-body">
+            <p>This interactive chart displays the total number of positive roadside drug test results across all age groups from 2008 to 2024.</p>
+            <ul class="info-list">
+              <li>The <strong>Compare 2023 &amp; 2024 Trends</strong> button lets you compare the overall scale of enforcement activity between 2023 and 2024.</li>
+              <li>The <strong>Pareto bars</strong> show the number of positive results for each age group.</li>
+              <li>The <strong>Pareto line</strong> reveals how each age group contributes cumulatively to all positive detections.</li>
+              <li>Hover over bars or line points to view exact values.</li>
+            </ul>
+          </div>
+        </details>
         <div id="chartControls" style="text-align:center; margin-bottom:10px;">
           <button id="compareBtn" style="background-color:#1976d2; color:white; border:none; padding:8px 16px;
               border-radius:6px; cursor:pointer; font-size:14px;">Compare 2023 & 2024 Trends
@@ -72,6 +74,11 @@
           if(e.key === 'ArrowLeft') location.href = prev;
           if(e.key === 'ArrowRight') location.href = next;
         });
+      })();
+      (function(){
+        if (window.matchMedia('(max-width: 780px)').matches) {
+          document.querySelectorAll('[data-mobile-collapsible]').forEach(el => el.removeAttribute('open'));
+        }
       })();
     </script>
   </body>

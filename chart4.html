@@ -21,7 +21,7 @@
       </div>
     </header>
 
-    <main class="dashboard fullscreen">
+    <main class="dashboard fullscreen chart4-page">
       <section class="card">
         <h3 style="margin:0; text-align:center; font-size:18px;">
           Jurisdictional Drug Test Outcomes by Selected Location
@@ -30,53 +30,30 @@
           Note: ACT is omitted from the map because its projected location 
           is hard to display at this scale.
         </p>
-        <div style="
-              background:#f8faff;
-              border-left:4px solid #00176B;
-              padding:14px 18px;
-              margin:8px 0 12px 0;
-              font-size:12px;
-              line-height:1.2;
-          ">
-            <strong style="font-size:13px; color:#00176B;">
-              How to interpret this visualisation:
-            </strong>
-            <br><br>
-            This chart combines a <strong>radar plot</strong> and a <strong>choropleth map</strong> to show how roadside drug testing
-            varies across different locations.  
-            <br><br>
-            - The <strong>radar chart</strong> displays each jurisdiction's total number of tests, allowing you to compare the overall
-            scale of enforcement activity between states.  
-            <br>
-            - The <strong>map</strong> highlights the distribution of testing volume across Australia. Darker shades represent higher
-            amounts of testing, while greyed-out states indicate locations with no recorded tests in the selected area.  
-            <br><br>
-            Use the <strong>dropdown menu</strong> above to focus on a specific testing location.  
-            When a location is selected, the radar chart highlights its point of comparison, while the choropleth updates to show
-            its contribution to different states.  
-            <br><br>
-            Hovering over map regions reveals more detailed statistics, including the percentage contribution and the
-            positive-test rate for that state.
-        </div>
-        <div class="chart-container" style="display:flex; flex-direction:column; width:100%; ">
-          <div style="margin-top:10px; text-align:center;">
-            <label><strong>Select Location:</strong></label>
-            <select id="locationSelect" style="font-size:14px; padding:6px 10px; width:200px; height:38px;"></select>
+        <details class="info-panel" data-mobile-collapsible open>
+          <summary>
+            <span class="info-chip">Guide</span>
+            <span>How to interpret this visualisation</span>
+            <span class="info-toggle-hint">Tap to toggle</span>
+          </summary>
+          <div class="info-body">
+            <p>This chart combines a <strong>radar plot</strong> and a <strong>choropleth map</strong> to show how roadside drug testing varies across different locations.</p>
+            <ul class="info-list">
+              <li>The <strong>radar chart</strong> displays each jurisdiction's total number of tests, allowing comparison of overall enforcement activity between states.</li>
+              <li>The <strong>map</strong> highlights distribution of testing volume across Australia. Darker shades represent higher amounts; greyed states indicate no recorded tests in the selected area.</li>
+              <li>Use the <strong>dropdown</strong> to focus on a specific location. The radar highlights that location, and the map updates to show its contribution.</li>
+              <li>Hover map regions to see detailed statistics, including percentage contribution and positive-test rate for that state.</li>
+            </ul>
           </div>
-          <div id="chart2-container"
-              style="
-                  display:flex;
-                  flex-direction:row;
-                  gap:24px;
-                  width:100%;
-                  max-width:860px;
-                  margin: 10px auto 0 auto;
-                  align-items:stretch;
-                  justify-content:center;
-                  padding:0 12px;
-                ">
-            <div id="chart2-radar" style="flex:1; min-height:320px;"></div>
-            <div id="chart2-map" style="flex:1; min-height:320px;"></div>
+        </details>
+        <div class="chart-container chart4-shell">
+          <div class="chart4-select">
+            <label><strong>Select Location:</strong></label>
+            <select id="locationSelect" class="chart4-select-input"></select>
+          </div>
+          <div id="chart2-container" class="chart4-grid">
+            <div id="chart2-radar" class="chart4-panel"></div>
+            <div id="chart2-map" class="chart4-panel"></div>
           </div>
         </div>
       </section>
@@ -106,6 +83,11 @@
           if(e.key === 'ArrowLeft') location.href = prev;
           if(e.key === 'ArrowRight') location.href = next;
         });
+      })();
+      (function(){
+        if (window.matchMedia('(max-width: 780px)').matches) {
+          document.querySelectorAll('[data-mobile-collapsible]').forEach(el => el.removeAttribute('open'));
+        }
       })();
     </script>
   </body>
