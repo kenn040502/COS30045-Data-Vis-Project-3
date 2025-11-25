@@ -210,8 +210,8 @@ function drawChart3(data, geoData) {
     const [mouseX, mouseY] = d3.pointer(event, container.node());
 
     tooltip
-        .style("left", event.pageX + 15 + "px")
-        .style("top", event.pageY - 20 + "px")
+        .style("left", mouseX + 15 + "px")
+        .style("top", mouseY - 20 + "px")
         .transition()
         .duration(150)
         .style("opacity", 1);
