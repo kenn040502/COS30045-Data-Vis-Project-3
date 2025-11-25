@@ -109,8 +109,13 @@ const drawChart1 = (data) => {
       `);
     })
     .on("mousemove", (event) => {
-      tooltip.style("left", event.pageX + 12 + "px")
-        .style("top", event.pageY - 20 + "px");
+      const bounds = document.getElementById("chart1").getBoundingClientRect();
+
+      const x = event.clientX - bounds.left;
+      const y = event.clientY - bounds.top;
+
+      tooltip.style("left",  (x + 12) + "px")
+        .style("top", (y - 20) + "px");
     })
     .on("mouseout", () => tooltip.style("opacity", 0))
     .transition()
