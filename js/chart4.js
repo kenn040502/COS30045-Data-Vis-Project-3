@@ -76,7 +76,7 @@ function createRadar(allData, containerSelector) {
 
     const bounds = container.node().getBoundingClientRect();
     const width = Math.max(360, bounds.width || 420);
-    const height = Math.max(320, bounds.height || 360);
+    const height = Math.max(260, bounds.height); 
     const radius = Math.min(width, height) * 0.42;
 
     const svg = container
@@ -252,7 +252,7 @@ function createLocationMap(allData, geoData, containerSelector) {
 
     const bounds = container.node().getBoundingClientRect();
     const width = Math.max(360, bounds.width || 420);
-    const height = Math.max(320, bounds.height || 360);
+    const height = Math.max(260, bounds.height);
 
     const svg = container
         .append("svg")
