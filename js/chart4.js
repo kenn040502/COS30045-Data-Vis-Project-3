@@ -183,7 +183,7 @@ function createRadar(allData, containerSelector) {
         .attr("stroke-width", 1.2);
 
     // Tooltip
-    const tooltip = d3.select("body")
+    const tooltip = container
         .append("div")
         .attr("class", "radar-tooltip")
         .style("position", "absolute")
@@ -274,7 +274,7 @@ function createLocationMap(allData, geoData, containerSelector) {
     const path = d3.geoPath().projection(projection);
 
     // Tooltip
-    const tooltip = d3.select("body")
+    const tooltip = container
         .append("div")
         .attr("class", "tooltip")
         .style("position", "absolute")

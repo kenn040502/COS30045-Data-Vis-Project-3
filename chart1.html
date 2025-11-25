@@ -24,17 +24,21 @@
     <main class="dashboard fullscreen">
       <section class="card">
         <h2 style="margin:20px; text-align:center; font-size:18px;">Positive Tests by Jurisdiction</h2>
-        <div style="background:#f8faff; border-left:4px solid #00176B; padding:14px 18px; margin:8px 0 14px 0; font-size:12px; line-height:1.2;">
-          <strong style="font-size:13px; color:#00176B;">
-            How to interpret this visualisation:
-          </strong>
-          <br><br>
-          This <strong>Pareto chart</strong> ranks jurisdictions by <strong>total positive roadside drug tests</strong> from 2008 to 2024.
-          <br><br>
-          - <strong>Blue bars</strong> show total positives per jurisdiction, sorted highest to lowest and animated on load.<br>
-          - The <strong>orange line</strong> shows the cumulative share; the <strong>80% guide</strong> highlights where most positives concentrate.<br>
-          - <strong>Hover or click</strong> a bar or orange point to see exact totals and cumulative percentage in the tooltip and info bar beneath the chart.
-        </div>
+        <details class="info-panel" data-mobile-collapsible open>
+          <summary>
+            <span class="info-chip">Guide</span>
+            <span>How to interpret this visualisation</span>
+            <span class="info-toggle-hint">Tap to toggle</span>
+          </summary>
+          <div class="info-body">
+            <p>This <strong>Pareto chart</strong> ranks jurisdictions by total positive roadside drug tests from 2008 to 2024.</p>
+            <ul class="info-list">
+              <li><strong>Blue bars</strong> show total positives per jurisdiction, sorted highest to lowest and animated on load.</li>
+              <li>The <strong>orange line</strong> shows the cumulative share; the <strong>80% guide</strong> highlights where most positives concentrate.</li>
+              <li><strong>Hover or click</strong> a bar or orange point to see exact totals and cumulative percentage in the tooltip and info bar beneath the chart.</li>
+            </ul>
+          </div>
+        </details>
         <div id="chart1" class="chart-container"></div>
         <div id="chart1-info" class="chart-info">Click a bar to see totals.</div>
       </section>
@@ -63,6 +67,11 @@
           if(e.key === 'ArrowLeft') location.href = prev;
           if(e.key === 'ArrowRight') location.href = next;
         });
+      })();
+      (function(){
+        if (window.matchMedia('(max-width: 780px)').matches) {
+          document.querySelectorAll('[data-mobile-collapsible]').forEach(el => el.removeAttribute('open'));
+        }
       })();
     </script>
   </body>
