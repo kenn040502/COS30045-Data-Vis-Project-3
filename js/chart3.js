@@ -338,7 +338,7 @@ function drawChart3(data, geoData) {
         .style("font-size", "11px")
         .style("fill", "#bbb")
         .style("font-style", "italic")
-        .text("(Data prior to 2021 unavailable. NT data limited.)")
+        .text("(Data prior to 2023 unavailable. NT data limited.)")
         .style("opacity", 0)
         .transition()
         .duration(350)
